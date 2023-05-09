@@ -106,7 +106,7 @@ describe("/api/categories", () => {
 });
 
 describe("/api/reviews/:review_id", () => {
-    xdescribe("GET", () => {
+    describe("GET", () => {
         test("Should respond with a single review object", () => {
             return request(app)
                 .get("/api/reviews/2")
@@ -130,7 +130,7 @@ describe("/api/reviews/:review_id", () => {
                         votes: expect.any(Number),
                         category: expect.any(String),
                         owner: expect.any(String),
-                        created_at: expect.any(Date),
+                        created_at: expect.any(String),
                     });
                 });
         });
