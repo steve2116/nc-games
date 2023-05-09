@@ -133,8 +133,10 @@ describe("/api/reviews", () => {
                             designer: expect.any(String),
                             comment_count: expect.any(Number),
                         });
+                        expect(review).not.hasOwnProperty("review_body");
                     });
                 });
         });
+        test("Should respond with an array of reviews sorted in  order", () => {});
     });
 });
