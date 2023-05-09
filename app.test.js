@@ -14,10 +14,17 @@ afterAll(() => {
 
 describe("/api/categories", () => {
     describe("GET", () => {
-        test("Should respond with an array of categories", () => {
+        test("Should response with an array with the correct amount of categories", () => {
             return request(app)
                 .get("/api/categories")
                 .expect(200)
+                .then((response) => {
+                    expect(response.body.categories.length).toBe(4);
+                });
+        });
+        test("Should respond with an array of correctly formatted categories", () => {
+            return request(app)
+                .get("/api/categories")
                 .then((response) => {
                     const { categories } = response.body;
                     categories.forEach((category) => {
@@ -39,7 +46,7 @@ describe("/api/categories", () => {
                 `
                 )
                 .then(() => {
-                    return request(app).get("/api/categories").expect(400);
+                    return request(app).get("/api/categories").expect(500);
                 })
                 .then((response) => {
                     const { msg } = response.body;

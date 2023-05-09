@@ -12,6 +12,6 @@ exports.selectCategories = () => {
             return data.rows;
         })
         .catch(() => {
-            return Promise.reject({ code: 400, msg: "Error fetching data" });
+            return Promise.reject({ code: 500, msg: "Error fetching data" });
         });
 };
