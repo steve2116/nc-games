@@ -14,19 +14,5 @@ exports.selectReviewById = (id) => {
             if (data.rows.length === 0) {
                 return Promise.reject({ code: 404, msg: "Review not found" });
             } else return data.rows[0];
-        })
-        .catch((err) => {
-            if (err.code && err.msg) {
-                return Promise.reject(err);
-            } else if (isNaN(id))
-                return Promise.reject({
-                    code: 400,
-                    msg: "Error fetching data",
-                });
-            else
-                return Promise.reject({
-                    code: 500,
-                    msg: "Error fetching data",
-                });
         });
 };
