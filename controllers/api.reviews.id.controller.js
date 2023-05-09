@@ -7,17 +7,6 @@ exports.getReviewById = (request, response, next) => {
             response.status(200).send({ review: review });
         })
         .catch((err) => {
-            if (err.code && err.msg) {
-                next(err);
-            } else if (isNaN(review_id))
-                next({
-                    code: 400,
-                    msg: "Error fetching data",
-                });
-            else
-                next({
-                    code: 500,
-                    msg: "Error fetching data",
-                });
+            next(err);
         });
 };

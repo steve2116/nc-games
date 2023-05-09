@@ -156,7 +156,7 @@ describe("/api/reviews/:review_id", () => {
                 .expect(400)
                 .then((response) => {
                     const { msg } = response.body;
-                    expect(msg).toBe("Error fetching data");
+                    expect(msg).toBe("Invalid review id");
                 });
         });
         test("Should respond with the correct error message for being passed a review_id not representative of a review", () => {
@@ -174,7 +174,7 @@ describe("/api/reviews/:review_id", () => {
                 .expect(400)
                 .then((response) => {
                     const { msg } = response.body;
-                    expect(msg).toBe("Error fetching data");
+                    expect(msg).toBe("Invalid review id");
                 });
         });
     });
