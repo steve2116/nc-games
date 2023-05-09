@@ -27,9 +27,9 @@ describe("/api", () => {
                                 info: expect.any(String),
                                 data: expect.any(String),
                                 keys: expect.any(Array),
-                                queries: null,
+                                queries: expect.any(Array),
                                 "req-body": "none",
-                                "res-body": "none",
+                                "res-body": expect.any(String),
                                 example: null,
                             },
                         },
@@ -39,7 +39,7 @@ describe("/api", () => {
                                 info: expect.any(String),
                                 data: expect.any(String),
                                 keys: expect.any(Array),
-                                queries: null,
+                                queries: expect.any(Array),
                                 "req-body": "none",
                                 "res-body": expect.any(String),
                                 example: {
@@ -100,6 +100,81 @@ describe("/api/categories", () => {
                 .then((response) => {
                     const { msg } = response.body;
                     expect(msg).toBe("Error fetching data");
+                });
+        });
+    });
+});
+
+describe("/api/reviews/:review_id", () => {
+    describe("GET", () => {
+        test("Should respond with a single review object", () => {
+            return request(app)
+                .get("/api/reviews/2")
+                .expect(200)
+                .then((response) => {
+                    expect(typeof response.body.review).toBe("object");
+                    expect(Array.isArray(response.body.review)).toBe(false);
+                });
+        });
+        test("Should respond with a correctly formatted review object", () => {
+            return request(app)
+                .get("/api/reviews/2")
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review).toMatchObject({
+                        review_id: expect.any(Number),
+                        title: expect.any(String),
+                        review_body: expect.any(String),
+                        designer: expect.any(String),
+                        review_img_url: expect.any(String),
+                        votes: expect.any(Number),
+                        category: expect.any(String),
+                        owner: expect.any(String),
+                        created_at: expect.any(String),
+                    });
+                });
+        });
+        test("Should respond with the correct error message for the server unable to fetch data", () => {
+            return db
+                .query(
+                    `
+                DROP TABLE comments;
+                DROP TABLE reviews;
+                `
+                )
+                .then(() => {
+                    return request(app).get("/api/reviews/2").expect(500);
+                })
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Error fetching data");
+                });
+        });
+        test("Should respond with the correct error message for being passed an invalid review_id", () => {
+            return request(app)
+                .get("/api/reviews/nonsense")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid review id");
+                });
+        });
+        test("Should respond with the correct error message for being passed a review_id not representative of a review", () => {
+            return request(app)
+                .get("/api/reviews/99999999")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Review not found");
+                });
+        });
+        test("Should not allow SQL injections", () => {
+            return request(app)
+                .get("/api/reviews/4;DROP TABLE reviews;")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid review id");
                 });
         });
     });
