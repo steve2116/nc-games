@@ -28,9 +28,16 @@ describe("/api/categories", () => {
                     });
                 });
         });
-        xtest("Should respond with the correct error if the server cannot retrieve data from the database", () => {
+        test("Should respond with the correct error if the server cannot retrieve data from the database", () => {
             return db
-                .query(`DROP TABLE categories;`)
+                .query(
+                    `
+                DROP TABLE comments;
+                DROP TABLE reviews;
+                DROP TABLE users;
+                DROP TABLE categories;
+                `
+                )
                 .then(() => {
                     return request(app).get("/api/categories").expect(400);
                 })
