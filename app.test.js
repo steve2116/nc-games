@@ -104,3 +104,37 @@ describe("/api/categories", () => {
         });
     });
 });
+
+describe("/api/reviews", () => {
+    describe("GET", () => {
+        test("Should respond with an array with the correct amount of reviews", () => {
+            return request(app)
+                .get("/api/reviews")
+                .expect(200)
+                .then((response) => {
+                    const { reviews } = response.body;
+                    expect(reviews.length).toBe(13);
+                });
+        });
+        test("Should respond with an array of correctly formatted reviews", () => {
+            return request(app)
+                .get("/api/reviews")
+                .then((response) => {
+                    const { reviews } = response.body;
+                    reviews.forEach((review) => {
+                        expect(review).toMatchObject({
+                            owner: expect.any(String),
+                            title: expect.any(String),
+                            review_id: expect.any(Number),
+                            category: expect.any(String),
+                            review_img_url: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            designer: expect.any(String),
+                            comment_count: expect.any(Number),
+                        });
+                    });
+                });
+        });
+    });
+});
