@@ -27,9 +27,9 @@ describe("/api", () => {
                                 info: expect.any(String),
                                 data: expect.any(String),
                                 keys: expect.any(Array),
-                                queries: null,
+                                queries: expect.any(Array),
                                 "req-body": "none",
-                                "res-body": "none",
+                                "res-body": expect.any(String),
                                 example: null,
                             },
                         },
@@ -39,7 +39,7 @@ describe("/api", () => {
                                 info: expect.any(String),
                                 data: expect.any(String),
                                 keys: expect.any(Array),
-                                queries: null,
+                                queries: expect.any(Array),
                                 "req-body": "none",
                                 "res-body": expect.any(String),
                                 example: {
@@ -100,6 +100,38 @@ describe("/api/categories", () => {
                 .then((response) => {
                     const { msg } = response.body;
                     expect(msg).toBe("Error fetching data");
+                });
+        });
+    });
+});
+
+describe("/api/reviews/:review_id", () => {
+    xdescribe("GET", () => {
+        test("Should respond with a single review object", () => {
+            return request(app)
+                .get("/api/reviews/2")
+                .expect(200)
+                .then((response) => {
+                    expect(typeof response.body.review).toBe("object");
+                    expect(Array.isArray(response.body.review)).toBe(false);
+                });
+        });
+        test("Should respond with a correctly formatted review object", () => {
+            return request(app)
+                .get("/api/reviews/2")
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review).toMatchObject({
+                        review_id: expect.any(Number),
+                        title: expect.any(String),
+                        review_body: expect.any(String),
+                        designer: expect.any(String),
+                        review_img_url: expect.any(String),
+                        votes: expect.any(Number),
+                        category: expect.any(String),
+                        owner: expect.any(String),
+                        created_at: expect.any(Date),
+                    });
                 });
         });
     });
