@@ -137,7 +137,16 @@ describe("/api/reviews", () => {
                     });
                 });
         });
-        test("Should respond with an array of reviews sorted in  order", () => {});
+        test("Should respond with an array of reviews sorted in descending date order", () => {
+            return request(app)
+                .get("/api/reviews")
+                .then((response) => {
+                    const { reviews } = response.body;
+                    expect(reviews).toBeSortedBy("created_at", {
+                        descending: true,
+                    });
+                });
+        });
     });
 });
 
