@@ -13,18 +13,31 @@ afterAll(() => {
 });
 
 describe("/api/categories", () => {
-    test("Should respond with an array of categories", () => {
-        return request(app)
-            .get("/api/categories")
-            .expect(200)
-            .then((data) => {
-                const { categories } = data.body;
-                categories.forEach((category) => {
-                    expect(category).toMatchObject({
-                        slug: expect.any(String),
-                        description: expect.any(String),
+    describe("GET", () => {
+        test("Should respond with an array of categories", () => {
+            return request(app)
+                .get("/api/categories")
+                .expect(200)
+                .then((response) => {
+                    const { categories } = response.body;
+                    categories.forEach((category) => {
+                        expect(category).toMatchObject({
+                            slug: expect.any(String),
+                            description: expect.any(String),
+                        });
                     });
                 });
-            });
+        });
+        xtest("Should respond with the correct error if the server cannot retrieve data from the database", () => {
+            return db
+                .query(`DROP TABLE categories;`)
+                .then(() => {
+                    return request(app).get("/api/categories").expect(400);
+                })
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Error fetching data");
+                });
+        });
     });
 });
