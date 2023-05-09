@@ -10,8 +10,5 @@ exports.selectCategories = () => {
         )
         .then((data) => {
             return data.rows;
-        })
-        .catch(() => {
-            return Promise.reject({ code: 500, msg: "Error fetching data" });
         });
 };
