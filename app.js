@@ -1,7 +1,10 @@
 const express = require("express");
+const getEndPoints = require("./controllers/api.controller.js");
 const { getCategories } = require("./controllers/api.categories.controller");
 
 const app = express();
+
+app.get("/api", getEndPoints);
 
 app.get("/api/categories", getCategories);
 
