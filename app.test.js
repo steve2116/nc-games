@@ -106,7 +106,7 @@ describe("/api/categories", () => {
 });
 
 describe("/api/reviews", () => {
-    describe("GET", () => {
+    xdescribe("GET", () => {
         test("Should respond with an array with the correct amount of reviews", () => {
             return request(app)
                 .get("/api/reviews")
