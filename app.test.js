@@ -134,5 +134,48 @@ describe("/api/reviews/:review_id", () => {
                     });
                 });
         });
+        test("Should respond with the correct error message for the server unable to fetch data", () => {
+            return db
+                .query(
+                    `
+                DROP TABLE comments;
+                DROP TABLE reviews;
+                `
+                )
+                .then(() => {
+                    return request(app).get("/api/reviews/2").expect(500);
+                })
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Error fetching data");
+                });
+        });
+        test("Should respond with the correct error message for being passed an invalid review_id", () => {
+            return request(app)
+                .get("/api/reviews/nonsense")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Error fetching data");
+                });
+        });
+        test("Should respond with the correct error message for being passed a review_id not representative of a review", () => {
+            return request(app)
+                .get("/api/reviews/99999999")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Review not found");
+                });
+        });
+        test("Should not allow SQL injections", () => {
+            return request(app)
+                .get("/api/reviews/4;DROP TABLE reviews;")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Error fetching data");
+                });
+        });
     });
 });
