@@ -7,6 +7,8 @@ const { getReviews } = require("./controllers/api.reviews.controller.js");
 
 const app = express();
 
+app.use(express.json());
+
 // /api
 app.get("/api", getEndPoints);
 
@@ -18,6 +20,9 @@ app.get("/api/reviews", getReviews);
 
 // /api/reviews/:review_id
 app.get("/api/reviews/:review_id", getReviewById);
+
+// /api/reviews/:review_id/comments
+app.post("/api/reviews/:review_id/comments");
 
 // Error handlers
 app.use(customErrors);

@@ -240,3 +240,28 @@ describe("/api/reviews/:review_id", () => {
         });
     });
 });
+
+describe("/api/reviews/:review_id/comments", () => {
+    describe.only("POST", () => {
+        xtest("Should respond with the comment that has been added", () => {
+            const comment = {
+                body: "Good title",
+                votes: 0,
+                author: "steve2116",
+                review_id: 9,
+                created_at: new Date(),
+            };
+            return request(app)
+                .post("/api/reviews/9/comments")
+                .send(comment)
+                .expect(201)
+                .then((response) => {
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        ...comment,
+                        comment_id: expect.any(Number),
+                    });
+                });
+        });
+    });
+});
