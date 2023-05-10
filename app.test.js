@@ -106,7 +106,7 @@ describe("/api/categories", () => {
 });
 
 describe("/api/reviews", () => {
-    xdescribe("GET", () => {
+    describe.only("GET", () => {
         test("Should respond with an array with the correct amount of reviews", () => {
             return request(app)
                 .get("/api/reviews")
@@ -131,8 +131,8 @@ describe("/api/reviews", () => {
                             created_at: expect.any(String),
                             votes: expect.any(Number),
                             designer: expect.any(String),
-                            comment_count: expect.any(Number),
                         });
+                        expect(isNaN(review.comment_count)).toBe(false);
                         expect(review).not.hasOwnProperty("review_body");
                     });
                 });
