@@ -1,8 +1,8 @@
 const request = require("supertest");
-const testData = require("./db/data/test-data/index.js");
-const seed = require("./db/seeds/seed.js");
-const db = require("./db/connection.js");
-const app = require("./app.js");
+const testData = require("../db/data/test-data/index.js");
+const seed = require("../db/seeds/seed.js");
+const db = require("../db/connection.js");
+const app = require("../app.js");
 
 beforeEach(() => {
     return seed(testData);
@@ -183,7 +183,7 @@ describe("/api/reviews/:review_id", () => {
                 .then((response) => {
                     const { review } = response.body;
                     expect(review).toMatchObject({
-                        review_id: expect.any(Number),
+                        review_id: 2,
                         title: expect.any(String),
                         review_body: expect.any(String),
                         designer: expect.any(String),
