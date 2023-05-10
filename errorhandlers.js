@@ -7,8 +7,6 @@ exports.customErrors = (err, request, response, next) => {
 exports.psqlErrors = (err, request, response, next) => {
     if (err.code === "22P02")
         return response.status(400).send({ msg: "Invalid review id" });
-    else if (err.code === "42P01")
-        return response.status(500).send({ msg: "Error fetching data" });
     else next(err);
 };
 
