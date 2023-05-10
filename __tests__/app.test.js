@@ -242,7 +242,7 @@ describe("/api/reviews/:review_id", () => {
 });
 
 describe("/api/reviews/:review_id/comments", () => {
-    describe.only("GET", () => {
+    describe("GET", () => {
         test("Should respond with an array with the correct amount of comments", () => {
             return request(app)
                 .get("/api/reviews/2/comments")
@@ -318,23 +318,53 @@ describe("/api/reviews/:review_id/comments", () => {
     });
     describe.only("POST", () => {
         xtest("Should respond with the comment that has been added", () => {
-            const comment = {
+            const postComment = {
                 body: "Good title",
                 votes: 0,
-                author: "steve2116",
+                author: "mallionaire",
                 review_id: 9,
                 created_at: new Date(),
             };
             return request(app)
                 .post("/api/reviews/9/comments")
-                .send(comment)
+                .send(postComment)
                 .expect(201)
                 .then((response) => {
                     const { comment } = response.body;
                     expect(comment).toMatchObject({
-                        ...comment,
+                        ...postComment,
                         comment_id: expect.any(Number),
                     });
+                });
+        });
+        xtest("Should respond with the comment that has been added if only some information is passed", () => {
+            const postComment = {
+                author: "mallionaire",
+                review_id: 9,
+                created_at: new Date(),
+            };
+            return request(app)
+                .post("/api/reviews/9/comments")
+                .send(postComment)
+                .expect(201)
+                .then((response) => {
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        ...postComment,
+                        body: expect.any(String),
+                        votes: expect.any(Number),
+                        comment_id: expect.any(Number),
+                    });
+                });
+        });
+        xtest("Should respond with the correct error message when passed an invalid review id", () => {
+            return request(app)
+                .post("/api/reviews/nonsense/comments")
+                .send(comment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid review id");
                 });
         });
     });
