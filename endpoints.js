@@ -75,6 +75,7 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: { reviews: reviewsEx.splice(0, 3) },
+                example: { reviews: reviewsEx },
             },
         },
         "/api/reviews/:review_id": {
