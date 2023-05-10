@@ -279,17 +279,13 @@ describe("/api/reviews/:review_id/comments", () => {
                     });
                 });
         });
-        test("Should respond with the correct error message when the server cannot fetch the data", () => {
-            return db
-                .query(`DROP TABLE comments;`)
-                .then(() => {
-                    return request(app)
-                        .get("/api/reviews/2/comments")
-                        .expect(500);
-                })
+        test("Should respond with an empty array when the requested review id has no comments", () => {
+            return request(app)
+                .get("/api/reviews/1/comments")
+                .expect(200)
                 .then((response) => {
-                    const { msg } = response.body;
-                    expect(msg).toBe("Internal server error");
+                    const { comments } = response.body;
+                    expect(comments.length).toBe(0);
                 });
         });
         test("Should respond with the correct error message when passed an invalid review_id", () => {
