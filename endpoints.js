@@ -1,10 +1,22 @@
-const { categoryData, reviewData } = require("./db/data/test-data/index.js");
+const {
+    categoryData,
+    reviewData,
+    commentData,
+} = require("./db/data/test-data/index.js");
 
-const reviewsEx = reviewData.map((review) => {
+const reviewDatawId = reviewData.map((review, ind) => {
+    return { ...review, review_id: ind + 1 };
+});
+
+const reviewsEx = reviewDatawId.map((review) => {
     const newReview = { ...review };
     newReview.comment_count = Math.floor(Math.random() * 3);
     delete newReview.review_body;
     return newReview;
+});
+
+const commentDatawId = commentData.map((comment, ind) => {
+    return { ...comment, comment_id: ind + 1 };
 });
 
 module.exports = {
@@ -20,6 +32,7 @@ module.exports = {
                     "/api/categories",
                     "/api/reviews",
                     "/api/reviews/:review_id",
+                    "/api/reviews/:review_id/comments",
                 ],
                 //CHANGE KEYS AFTER EACH
                 queries: [],
@@ -61,6 +74,7 @@ module.exports = {
                 queries: [],
                 "req-body": "none",
                 "res-body": "json",
+                example: { reviews: reviewsEx.splice(0, 3) },
                 example: { reviews: reviewsEx },
             },
         },
@@ -84,7 +98,28 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    review: reviewData[1],
+                    review: reviewDatawId[1],
+                },
+            },
+        },
+        "/api/reviews/:review_id/comments": {
+            get: {
+                status: "OK",
+                info: "A list of comments of specified review id",
+                data: "Each comment as an object with properties and review_id of the requested review",
+                keys: [
+                    "comment_id",
+                    "votes",
+                    "created_at",
+                    "author",
+                    "body",
+                    "review_id",
+                ],
+                queries: [],
+                "req-body": "none",
+                "res-body": "json",
+                example: {
+                    comments: commentDatawId.splice(0, 3),
                 },
             },
         },
