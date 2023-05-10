@@ -99,14 +99,14 @@ describe("/api/categories", () => {
                 })
                 .then((response) => {
                     const { msg } = response.body;
-                    expect(msg).toBe("Error fetching data");
+                    expect(msg).toBe("Internal server error");
                 });
         });
     });
 });
 
 describe("/api/reviews", () => {
-    describe.only("GET", () => {
+    describe("GET", () => {
         test("Should respond with an array with the correct amount of reviews", () => {
             return request(app)
                 .get("/api/reviews")
@@ -145,6 +145,22 @@ describe("/api/reviews", () => {
                     expect(reviews).toBeSortedBy("created_at", {
                         descending: true,
                     });
+                });
+        });
+        test("Should respond with the correct error message if the data cannot be fetched from the database", () => {
+            return db
+                .query(
+                    `
+                DROP TABLE comments;
+                DROP TABLE reviews;
+                `
+                )
+                .then(() => {
+                    return request(app).get("/api/reviews").expect(500);
+                })
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Internal server error");
                 });
         });
     });
@@ -192,7 +208,7 @@ describe("/api/reviews/:review_id", () => {
                 })
                 .then((response) => {
                     const { msg } = response.body;
-                    expect(msg).toBe("Error fetching data");
+                    expect(msg).toBe("Internal server error");
                 });
         });
         test("Should respond with the correct error message for being passed an invalid review_id", () => {
