@@ -63,7 +63,7 @@ describe("/api", () => {
 
 describe("/api/categories", () => {
     describe("GET", () => {
-        test("Should response with an array with the correct amount of categories", () => {
+        test("Should respond with an array with the correct amount of categories", () => {
             return request(app)
                 .get("/api/categories")
                 .expect(200)
@@ -242,6 +242,80 @@ describe("/api/reviews/:review_id", () => {
 });
 
 describe("/api/reviews/:review_id/comments", () => {
+    describe.only("GET", () => {
+        test("Should respond with an array with the correct amount of comments", () => {
+            return request(app)
+                .get("/api/reviews/2/comments")
+                .expect(200)
+                .then((response) => {
+                    const { comments } = response.body;
+                    expect(comments.length).toBe(3);
+                });
+        });
+        test("Should respond with an array of correctly formatted comments", () => {
+            return request(app)
+                .get("/api/reviews/2/comments")
+                .then((response) => {
+                    const { comments } = response.body;
+                    comments.forEach((comment) => {
+                        expect(comment).toMatchObject({
+                            comment_id: expect.any(Number),
+                            votes: expect.any(Number),
+                            created_at: expect.any(String),
+                            author: expect.any(String),
+                            body: expect.any(String),
+                            review_id: expect.any(Number),
+                        });
+                    });
+                });
+        });
+        test("Should respond with the array of comments sorted with the most recent comments first", () => {
+            return request(app)
+                .get("/api/reviews/3/comments")
+                .then((response) => {
+                    const { comments } = response.body;
+                    expect(comments).toBeSortedBy("created_at", {
+                        descending: true,
+                    });
+                });
+        });
+        test("Should respond with an empty array when the requested review id has no comments", () => {
+            return request(app)
+                .get("/api/reviews/1/comments")
+                .expect(200)
+                .then((response) => {
+                    const { comments } = response.body;
+                    expect(comments.length).toBe(0);
+                });
+        });
+        test("Should respond with the correct error message when passed an invalid review_id", () => {
+            return request(app)
+                .get("/api/reviews/nonsense/comments")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid review id");
+                });
+        });
+        test("Should respond with the correct error message when passed a review_id that doesn't exist", () => {
+            return request(app)
+                .get("/api/reviews/99999/comments")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Review not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .get("/api/reviews/2;DROP TABLE comments;/comments")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid review id");
+                });
+        });
+    });
     describe.only("POST", () => {
         xtest("Should respond with the comment that has been added", () => {
             const comment = {
