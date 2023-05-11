@@ -12,6 +12,7 @@ const {
 } = require("./controllers/api.reviews.id.comments.controller.js");
 const { getReviews } = require("./controllers/api.reviews.controller.js");
 const checkJson = require("./middleware/json-body.js");
+const { getUsers } = require("./controllers/api.users.controller.js");
 const {
     deleteCommentById,
 } = require("./controllers/api.comments.id.controller.js");
@@ -39,6 +40,9 @@ app.post("/api/reviews/:review_id/comments", checkJson, postCommentByReviewId);
 
 // /api/comments/:comment_id
 app.delete("/api/comments/:comment_id", deleteCommentById);
+
+// /api/users
+app.get("/api/users", getUsers);
 
 // Error handlers
 app.use(customErrors);
