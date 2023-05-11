@@ -53,7 +53,7 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    categories: categoryData,
+                    categories: [categoryData[0]],
                 },
             },
         },
@@ -76,8 +76,7 @@ module.exports = {
                 queries: ["category", "sort_by", "order"],
                 "req-body": "none",
                 "res-body": "json",
-                example: { reviews: [...reviewsEx].splice(0, 3) },
-                example: { reviews: reviewsEx },
+                example: { reviews: [reviewsEx[0]] },
             },
         },
         "/api/reviews/:review_id": {
@@ -100,7 +99,7 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    review: reviewDatawId[1],
+                    review: reviewDatawId[0],
                 },
             },
             patch: {
@@ -122,7 +121,7 @@ module.exports = {
                 "req-body": "json",
                 "res-body": "json",
                 example: {
-                    review: reviewDatawId[1],
+                    review: reviewDatawId[0],
                 },
             },
         },
@@ -143,7 +142,7 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    comments: [...commentDatawId].splice(0, 3),
+                    comments: [commentDatawId[0]],
                 },
             },
             post: {
@@ -162,7 +161,7 @@ module.exports = {
                 "req-body": "json",
                 "res-body": "json",
                 example: {
-                    comments: [...commentDatawId].splice(0, 3),
+                    comments: [commentDatawId[0]],
                 },
             },
         },
@@ -187,7 +186,7 @@ module.exports = {
                 queries: [],
                 "req-body": "none",
                 "res-body": "json",
-                example: { users: [...userData].splice(0, 3) },
+                example: { users: [userData[0]] },
             },
         },
     },
