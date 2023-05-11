@@ -217,7 +217,7 @@ describe("/api/reviews/:review_id", () => {
                 .expect(400)
                 .then((response) => {
                     const { msg } = response.body;
-                    expect(msg).toBe("Invalid review id");
+                    expect(msg).toBe("Invalid request");
                 });
         });
         test("Should respond with the correct error message for being passed a review_id not representative of a review", () => {
@@ -235,14 +235,14 @@ describe("/api/reviews/:review_id", () => {
                 .expect(400)
                 .then((response) => {
                     const { msg } = response.body;
-                    expect(msg).toBe("Invalid review id");
+                    expect(msg).toBe("Invalid request");
                 });
         });
     });
 });
 
 describe("/api/reviews/:review_id/comments", () => {
-    describe.only("GET", () => {
+    describe("GET", () => {
         test("Should respond with an array with the correct amount of comments", () => {
             return request(app)
                 .get("/api/reviews/2/comments")
@@ -294,7 +294,7 @@ describe("/api/reviews/:review_id/comments", () => {
                 .expect(400)
                 .then((response) => {
                     const { msg } = response.body;
-                    expect(msg).toBe("Invalid review id");
+                    expect(msg).toBe("Invalid request");
                 });
         });
         test("Should respond with the correct error message when passed a review_id that doesn't exist", () => {
@@ -312,7 +312,165 @@ describe("/api/reviews/:review_id/comments", () => {
                 .expect(400)
                 .then((response) => {
                     const { msg } = response.body;
-                    expect(msg).toBe("Invalid review id");
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+    });
+    describe.only("POST", () => {
+        test("Should respond with the comment that has been added", () => {
+            const postComment = {
+                username: "mallionaire",
+                body: "Good title",
+            };
+            return request(app)
+                .post("/api/reviews/9/comments")
+                .send(postComment)
+                .expect(201)
+                .then((response) => {
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        author: "mallionaire",
+                        body: "Good title",
+                        comment_id: expect.any(Number),
+                        votes: 0,
+                        created_at: expect.any(String),
+                        review_id: 9,
+                    });
+                });
+        });
+        test("Should respond with the comment that has been added if only some information is passed", () => {
+            const postComment = {
+                username: "mallionaire",
+            };
+            return request(app)
+                .post("/api/reviews/9/comments")
+                .send(postComment)
+                .expect(201)
+                .then((response) => {
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        author: "mallionaire",
+                        body: expect.any(String),
+                        comment_id: expect.any(Number),
+                        votes: 0,
+                        created_at: expect.any(String),
+                        review_id: 9,
+                    });
+                });
+        });
+        test("Should respond with the comment that has been added if too much information has been passed", () => {
+            const postComment = {
+                body: "Good title",
+                votes: 2,
+                username: "mallionaire",
+                review_id: 2,
+                created_at: new Date(),
+                "what author likes": "cheese",
+            };
+            return request(app)
+                .post("/api/reviews/9/comments")
+                .send(postComment)
+                .expect(201)
+                .then((response) => {
+                    delete postComment["what author likes"];
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        author: "mallionaire",
+                        body: "Good title",
+                        comment_id: expect.any(Number),
+                        votes: 0,
+                        created_at: expect.any(String),
+                        review_id: 9,
+                    });
+                    expect(comment).not.hasOwnProperty("what author likes");
+                    expect(comment).not.hasOwnProperty("username");
+                    expect(comment).not.hasOwnProperty(
+                        "created_at",
+                        postComment.created_at
+                    );
+                });
+        });
+        test("Should respond with the correct error message when passed an invalid review id", () => {
+            const postComment = {
+                username: "mallionaire",
+                body: "Good title",
+            };
+            return request(app)
+                .post("/api/reviews/nonsense/comments")
+                .send(postComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when passed a review id that doesn't exist", () => {
+            const postComment = {
+                username: "mallionaire",
+                body: "Good title",
+            };
+            return request(app)
+                .post("/api/reviews/99999/comments")
+                .send(postComment)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const postComment = {
+                username: "Mallionaire",
+                body: "Great title",
+            };
+            return request(app)
+                .post("/api/reviews/9;DROP TABLE comments;/comments")
+                .send(postComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when passed a username that doesn't exixt", () => {
+            const postComment = {
+                username: "steve2116",
+                body: "Good title",
+            };
+            return request(app)
+                .post("/api/reviews/1/comments")
+                .send(postComment)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when not passed a username", () => {
+            const postComment = {
+                body: "Great title",
+            };
+            return request(app)
+                .post("/api/reviews/9/comments")
+                .send(postComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const postComment =
+                "city,state,population,land area\nseattle,WA,938723,63.2\nkansas city,NY,237833,230.3";
+            return request(app)
+                .post("/api/reviews/9/comments")
+                .send(postComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
                 });
         });
     });
