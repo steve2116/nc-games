@@ -239,6 +239,128 @@ describe("/api/reviews/:review_id", () => {
                 });
         });
     });
+    describe("PATCH", () => {
+        test("Should respond with the review", () => {
+            const patchReview = { inc_votes: 0 };
+            return request(app)
+                .patch("/api/reviews/9")
+                .send(patchReview)
+                .expect(200)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review).toMatchObject({
+                        review_id: 9,
+                        title: expect.any(String),
+                        review_body: expect.any(String),
+                        designer: expect.any(String),
+                        review_img_url: expect.any(String),
+                        votes: 10,
+                        category: expect.any(String),
+                        owner: expect.any(String),
+                        created_at: expect.any(String),
+                    });
+                });
+        });
+        test("Should update the review", () => {
+            const patchReview = { inc_votes: 2 };
+            return request(app)
+                .patch("/api/reviews/9")
+                .send(patchReview)
+                .expect(200)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review.votes).toBe(12);
+                });
+        });
+        test("Should respond with the correct error message when passed an invalid review id", () => {
+            const patchReview = { inc_votes: 1 };
+            return request(app)
+                .patch("/api/reviews/nonsense")
+                .send(patchReview)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when passed a review id that doesn't exist", () => {
+            const patchReview = { inc_votes: 1 };
+            return request(app)
+                .patch("/api/reviews/99999")
+                .send(patchReview)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Review not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const patchReview = { inc_votes: 1 };
+            return request(app)
+                .patch("/api/reviews/9;DROP TABLE reviews;")
+                .send(patchReview)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when not passed a number", () => {
+            const patchReview = { inc_votes: "defintely a number" };
+            return request(app)
+                .patch("/api/reviews/9")
+                .send(patchReview)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when not passed the right key name", () => {
+            const patchReview = { dec_votes: -1 };
+            return request(app)
+                .patch("/api/reviews/9")
+                .send(patchReview)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should ignore any extra key-value pairs", () => {
+            const patchReview = {
+                inc_votes: 200,
+                dec_votes: -1,
+                "a key": "a value",
+            };
+            return request(app)
+                .patch("/api/reviews/9")
+                .send(patchReview)
+                .expect(200)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review).toMatchObject({
+                        review_id: 9,
+                        votes: 210,
+                    });
+                    expect(review).not.toMatchObject({
+                        dec_votes: expect.anything(),
+                        "a key": expect.anything(),
+                    });
+                });
+        });
+        test("Should respond with the correct error message when the body is incorrectly formatted", () => {
+            const patchReview = "inc_votes\n2";
+            return request(app)
+                .patch("/api/reviews/9")
+                .send(patchReview)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+    });
 });
 
 describe("/api/reviews/:review_id/comments", () => {
@@ -316,7 +438,7 @@ describe("/api/reviews/:review_id/comments", () => {
                 });
         });
     });
-    describe.only("POST", () => {
+    describe("POST", () => {
         test("Should respond with the comment that has been added", () => {
             const postComment = {
                 username: "mallionaire",
