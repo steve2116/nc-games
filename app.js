@@ -12,6 +12,7 @@ const {
 } = require("./controllers/api.reviews.id.comments.controller.js");
 const { getReviews } = require("./controllers/api.reviews.controller.js");
 const checkJson = require("./middleware/json-body.js");
+const { getUsers } = require("./controllers/api.users.controller.js");
 
 const app = express();
 
@@ -33,6 +34,9 @@ app.patch("/api/reviews/:review_id", checkJson, patchReviewById);
 // /api/reviews/:review_id/comments
 app.get("/api/reviews/:review_id/comments", getCommentsByReviewId);
 app.post("/api/reviews/:review_id/comments", checkJson, postCommentByReviewId);
+
+// /api/users
+app.get("/api/users", getUsers);
 
 // Error handlers
 app.use(customErrors);

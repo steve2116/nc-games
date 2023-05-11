@@ -2,6 +2,7 @@ const {
     categoryData,
     reviewData,
     commentData,
+    userData,
 } = require("./db/data/test-data/index.js");
 
 const reviewDatawId = reviewData.map((review, ind) => {
@@ -33,6 +34,7 @@ module.exports = {
                     "/api/reviews",
                     "/api/reviews/:review_id",
                     "/api/reviews/:review_id/comments",
+                    "/api/users",
                 ],
                 //CHANGE KEYS AFTER EACH
                 queries: [],
@@ -121,6 +123,18 @@ module.exports = {
                 example: {
                     comments: commentDatawId.splice(0, 3),
                 },
+            },
+        },
+        "/api/users": {
+            get: {
+                status: "OK",
+                info: "Returns a list of users",
+                data: "Each user as an object with properties",
+                keys: ["username", "name", "avatar_url"],
+                queries: [],
+                "req-body": "none",
+                "res-body": "json",
+                example: { users: [...userData].splice(0, 3) },
             },
         },
     },
