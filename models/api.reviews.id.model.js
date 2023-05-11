@@ -16,3 +16,17 @@ exports.selectReviewById = (id) => {
             } else return data.rows[0];
         });
 };
+
+exports.updateReviewById = (id, inc_votes) => {
+    return db
+        .query(
+            `
+        UPDATE reviews
+        SET votes = votes + $2
+        WHERE review_id = $1
+        RETURNING *
+    ;`,
+            [id, inc_votes]
+        )
+        .then((data) => data.rows[0]);
+};

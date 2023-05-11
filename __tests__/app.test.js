@@ -239,10 +239,45 @@ describe("/api/reviews/:review_id", () => {
                 });
         });
     });
+    describe.only("PATCH", () => {
+        test("Should respond with the review", () => {
+            const patchReview = { inc_votes: 0 };
+            return request(app)
+                .patch("/api/reviews/9")
+                .send(patchReview)
+                .expect(200)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review).toMatchObject({
+                        review_id: 9,
+                        title: expect.any(String),
+                        review_body: expect.any(String),
+                        designer: expect.any(String),
+                        review_img_url: expect.any(String),
+                        votes: 10,
+                        category: expect.any(String),
+                        owner: expect.any(String),
+                        created_at: expect.any(String),
+                    });
+                });
+        });
+        test("Should update the review", () => {
+            const patchReview = { inc_votes: 2 };
+            return request(app)
+                .patch("/api/reviews/9")
+                .send(patchReview)
+                .expect(200)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review.votes).toBe(12);
+                });
+        });
+        test("Should respond with the correct error message when passed an invalid review id", () => {});
+    });
 });
 
 describe("/api/reviews/:review_id/comments", () => {
-    describe.only("GET", () => {
+    describe("GET", () => {
         test("Should respond with an array with the correct amount of comments", () => {
             return request(app)
                 .get("/api/reviews/2/comments")
