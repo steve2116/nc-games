@@ -16,3 +16,21 @@ exports.selectReviewById = (id) => {
             } else return data.rows[0];
         });
 };
+
+exports.updateReviewById = (id, inc_votes) => {
+    return db
+        .query(
+            `
+        UPDATE reviews
+        SET votes = votes + $2
+        WHERE review_id = $1
+        RETURNING *
+    ;`,
+            [id, inc_votes]
+        )
+        .then((data) => {
+            if (data.rows.length === 0) {
+                return Promise.reject({ code: 404, msg: "Review not found" });
+            } else return data.rows[0];
+        });
+};
