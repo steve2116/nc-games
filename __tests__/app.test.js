@@ -163,6 +163,28 @@ describe("/api/reviews", () => {
                     expect(msg).toBe("Internal server error");
                 });
         });
+        describe.only("Queries", () => {
+            test('Should allow the user to query "category"', () => {
+                return request(app)
+                    .get("/api/reviews?category=social deduction")
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        reviews.forEach((review) => {
+                            expect(review).toMatchObject({
+                                owner: expect.any(String),
+                                title: expect.any(String),
+                                review_id: expect.any(Number),
+                                category: "social deduction",
+                                review_img_url: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                designer: expect.any(String),
+                            });
+                        });
+                    });
+            });
+        });
     });
 });
 
