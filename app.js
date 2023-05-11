@@ -28,7 +28,7 @@ app.get("/api/reviews", getReviews);
 
 // /api/reviews/:review_id
 app.get("/api/reviews/:review_id", getReviewById);
-app.patch("/api/reviews/:review_id", patchReviewById);
+app.patch("/api/reviews/:review_id", checkJson, patchReviewById);
 
 // /api/reviews/:review_id/comments
 app.get("/api/reviews/:review_id/comments", getCommentsByReviewId);
