@@ -32,6 +32,7 @@ module.exports = {
                     "/api/reviews",
                     "/api/reviews/:review_id",
                     "/api/reviews/:review_id/comments",
+                    "/api/comments/:comment_id",
                 ],
 
                 queries: [],
@@ -161,6 +162,18 @@ module.exports = {
                 example: {
                     comments: commentDatawId.splice(0, 3),
                 },
+            },
+        },
+        "/api/comments/:comment_id": {
+            delete: {
+                status: "OK",
+                info: "Deletes the specified comment",
+                data: "none",
+                keys: [],
+                queries: [],
+                "req-body": "none",
+                "res-body": "none",
+                example: null,
             },
         },
     },

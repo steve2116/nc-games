@@ -599,7 +599,7 @@ describe("/api/reviews/:review_id/comments", () => {
 });
 
 describe("/api/comments/:comment_id", () => {
-    describe.only("DELETE", () => {
+    describe("DELETE", () => {
         test("Should respond with no body and a 204 status code", () => {
             return request(app)
                 .delete("/api/comments/1")
@@ -609,7 +609,7 @@ describe("/api/comments/:comment_id", () => {
                     expect(Object.keys(body).length).toBe(0);
                 });
         });
-        xtest("Should delete the comment", () => {
+        test("Should delete the comment", () => {
             return request(app)
                 .delete("/api/comments/4")
                 .then(() => {
@@ -620,6 +620,33 @@ describe("/api/comments/:comment_id", () => {
                 .then((data) => {
                     const comments = data.rows;
                     expect(comments.length).toBe(0);
+                });
+        });
+        test("Should respond with the correct error message when passed an invalid comment id", () => {
+            return request(app)
+                .delete("/api/comments/nonsense")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when passed a comment id that doesn't exist", () => {
+            return request(app)
+                .delete("/api/comments/99999")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Comment not found");
+                });
+        });
+        test("Should not allow SQL injections", () => {
+            return request(app)
+                .delete("/api/comments/1;DROP TABLE comments;")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
                 });
         });
     });
