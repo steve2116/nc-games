@@ -239,7 +239,7 @@ describe("/api/reviews/:review_id", () => {
                 });
         });
     });
-    describe.only("PATCH", () => {
+    describe("PATCH", () => {
         test("Should respond with the review", () => {
             const patchReview = { inc_votes: 0 };
             return request(app)
