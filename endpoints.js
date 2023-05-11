@@ -5,20 +5,20 @@ const {
     userData,
 } = require("./db/data/test-data/index.js");
 
-const reviewDatawId = reviewData.map((review, ind) => {
-    return { ...review, review_id: ind + 1 };
-});
+const categoryExample = categoryData[0];
+const reviewExample = reviewData[0];
+const commentExample = commentData[0];
+const userExample = userData[0];
 
-const reviewsEx = reviewDatawId.map((review) => {
-    const newReview = { ...review };
-    newReview.comment_count = Math.floor(Math.random() * 3);
-    delete newReview.review_body;
-    return newReview;
-});
+const reviewDatawId = { ...reviewExample, review_id: 1 };
 
-const commentDatawId = commentData.map((comment, ind) => {
-    return { ...comment, comment_id: ind + 1 };
-});
+const reviewsEx = {
+    ...reviewDatawId,
+    comment_count: Math.floor(Math.random() * 3),
+};
+delete reviewsEx.review_body;
+
+const commentDatawId = { ...commentExample, comment_id: 1 };
 
 module.exports = {
     endpoints: {
@@ -53,7 +53,7 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    categories: [categoryData[0]],
+                    categories: [categoryExample],
                 },
             },
         },
@@ -76,7 +76,7 @@ module.exports = {
                 queries: ["category", "sort_by", "order"],
                 "req-body": "none",
                 "res-body": "json",
-                example: { reviews: [reviewsEx[0]] },
+                example: { reviews: [reviewsEx] },
             },
         },
         "/api/reviews/:review_id": {
@@ -99,7 +99,7 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    review: reviewDatawId[0],
+                    review: reviewDatawId,
                 },
             },
             patch: {
@@ -121,7 +121,7 @@ module.exports = {
                 "req-body": "json",
                 "res-body": "json",
                 example: {
-                    review: reviewDatawId[0],
+                    review: reviewDatawId,
                 },
             },
         },
@@ -142,7 +142,7 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    comments: [commentDatawId[0]],
+                    comments: [commentDatawId],
                 },
             },
             post: {
@@ -161,7 +161,7 @@ module.exports = {
                 "req-body": "json",
                 "res-body": "json",
                 example: {
-                    comments: [commentDatawId[0]],
+                    comments: [commentDatawId],
                 },
             },
         },
@@ -186,7 +186,7 @@ module.exports = {
                 queries: [],
                 "req-body": "none",
                 "res-body": "json",
-                example: { users: [userData[0]] },
+                example: { users: [userExample] },
             },
         },
     },
