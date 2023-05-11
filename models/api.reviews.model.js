@@ -16,8 +16,6 @@ exports.selectReviews = ({ category, sort_by, order }) => {
         GROUP BY reviews.review_id
         ORDER BY ${sort_by} ${order.toUpperCase()}
     ;`;
-    console.log(queryString);
-    console.log(queryArray);
     return db.query(queryString, queryArray).then(({ rows }) => {
         return rows;
     });
