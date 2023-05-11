@@ -73,10 +73,10 @@ module.exports = {
                     "designer",
                     "comment_count",
                 ],
-                queries: [],
+                queries: ["category", "sort_by", "order"],
                 "req-body": "none",
                 "res-body": "json",
-                example: { reviews: reviewsEx.splice(0, 3) },
+                example: { reviews: [...reviewsEx].splice(0, 3) },
                 example: { reviews: reviewsEx },
             },
         },
@@ -143,7 +143,7 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    comments: commentDatawId.splice(0, 3),
+                    comments: [...commentDatawId].splice(0, 3),
                 },
             },
             post: {
@@ -162,7 +162,7 @@ module.exports = {
                 "req-body": "json",
                 "res-body": "json",
                 example: {
-                    comments: commentDatawId.splice(0, 3),
+                    comments: [...commentDatawId].splice(0, 3),
                 },
             },
         },
