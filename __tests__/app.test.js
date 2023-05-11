@@ -163,25 +163,110 @@ describe("/api/reviews", () => {
                     expect(msg).toBe("Internal server error");
                 });
         });
-        describe.only("Queries", () => {
+        describe("Queries", () => {
             test('Should allow the user to query "category"', () => {
                 return request(app)
-                    .get("/api/reviews?category=social deduction")
+                    .get("/api/reviews?category=dexterity")
                     .expect(200)
                     .then((response) => {
                         const { reviews } = response.body;
+                        expect(reviews.length).toBe(1);
                         reviews.forEach((review) => {
                             expect(review).toMatchObject({
                                 owner: expect.any(String),
                                 title: expect.any(String),
                                 review_id: expect.any(Number),
-                                category: "social deduction",
+                                category: "dexterity",
                                 review_img_url: expect.any(String),
                                 created_at: expect.any(String),
                                 votes: expect.any(Number),
                                 designer: expect.any(String),
                             });
                         });
+                    });
+            });
+            test('Should allow the user to query "sort_by"', () => {
+                return request(app)
+                    .get("/api/reviews?sort_by=votes")
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews).toBeSortedBy("votes", {
+                            descending: true,
+                        });
+                    });
+            });
+            test('Should allow the user to query "order"', () => {
+                return request(app)
+                    .get("/api/reviews?order=asc")
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews).toBeSortedBy("created_at", {
+                            descending: false,
+                        });
+                    });
+            });
+            test("Should allow multiple queries", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews?category=social deduction&sort_by=title&order=asc"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(11);
+                        expect(reviews).toBeSortedBy("title", {
+                            descending: false,
+                        });
+                        reviews.forEach((review) => {
+                            expect(review.category).toBe("social deduction");
+                        });
+                    });
+            });
+            test("Should ignore additional queries, or queries that don't exist", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews?category=social deduction&sort_by=title&order=asc&limit=3"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(11);
+                        expect(reviews).toBeSortedBy("title", {
+                            descending: false,
+                        });
+                        reviews.forEach((review) => {
+                            expect(review.category).toBe("social deduction");
+                        });
+                    });
+            });
+            test("Should ignore queries that aren't valid", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews?category=social deduction&sort_by=title&order=asc&19223784=[Function: HelloWorld=(Hello?) => undefined]"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(11);
+                        expect(reviews).toBeSortedBy("title", {
+                            descending: false,
+                        });
+                        reviews.forEach((review) => {
+                            expect(review.category).toBe("social deduction");
+                        });
+                    });
+            });
+            test("Should ignore SQL injection", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews?category=social deduction;DROP TABLE reviews;"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(0);
                     });
             });
         });
