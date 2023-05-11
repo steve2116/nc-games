@@ -1,5 +1,4 @@
 exports.customErrors = (err, request, response, next) => {
-    console.log(err);
     if (err.code && err.msg) {
         return response.status(err.code).send({ msg: err.msg });
     } else next(err);
@@ -7,7 +6,9 @@ exports.customErrors = (err, request, response, next) => {
 
 exports.psqlErrors = (err, request, response, next) => {
     if (err.code === "22P02")
-        return response.status(400).send({ msg: "Invalid review id" });
+        return response.status(400).send({ msg: "Invalid request" });
+    else if (err.code === "23503")
+        return response.status(404).send({ msg: "Invalid request" });
     else next(err);
 };
 

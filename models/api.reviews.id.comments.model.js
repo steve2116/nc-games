@@ -20,31 +20,30 @@ exports.selectCommentsByReviewId = (id) => {
 };
 
 exports.insertCommentByReviewId = (id, comment) => {
-    return checkIdExists(id).then((exist) => {
-        if (exist) {
-            if (!comment.author || comment.review_id != id)
-                return Promise.reject();
-            const commentToFormat = [
-                "body" in comment ? comment["body"] : "An empty comment",
-                id,
-                comment["author"],
-                "votes" in comment ? comment["votes"] : 0,
-                "created_at" in comment ? comment["created_at"] : Date.now(),
-            ];
-            const commentToInsert = format(
-                `
-                INSERT INTO comments
-                    (body, review_id, author, votes, created_at)
-                VALUES
-                    %L
-                RETURNING *
-            ;`,
-                [commentToFormat]
-            );
-            return db.query(commentToInsert).then((data) => {
-                return data.rows[0];
-            });
-        } else return Promise.reject();
+    if (!comment.username)
+        return Promise.reject({
+            code: 400,
+            msg: "Insufficient information to make request",
+        });
+    const commentToFormat = [
+        "body" in comment ? comment.body : "",
+        id,
+        comment.username,
+        0,
+        new Date(),
+    ];
+    const commentToInsert = format(
+        `
+            INSERT INTO comments
+                (body, review_id, author, votes, created_at)
+            VALUES
+                %L
+            RETURNING *
+        ;`,
+        [commentToFormat]
+    );
+    return db.query(commentToInsert).then((data) => {
+        return data.rows[0];
     });
 };
 
