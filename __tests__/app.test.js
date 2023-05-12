@@ -735,6 +735,50 @@ describe("/api/users", () => {
     });
 });
 
+describe("/api/users/:username", () => {
+    describe("GET", () => {
+        test("Should respond with a user", () => {
+            return request(app)
+                .get("/api/users/mallionaire")
+                .expect(200)
+                .then((response) => {
+                    expect(response.body).hasOwnProperty("user");
+                });
+        });
+        test("Should respond with a correctly formatted user", () => {
+            return request(app)
+                .get("/api/users/mallionaire")
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        username: "mallionaire",
+                        name: "haz",
+                        avatar_url:
+                            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+                    });
+                });
+        });
+        test("Should respond with the correct error when passed a username that doesn't exist", () => {
+            return request(app)
+                .get("/api/users/99999999kasjhdaksjdh")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .get("/api/users/mallionaire; DROP TABLE users;")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+    });
+});
+
 describe("/api/comments/:comment_id", () => {
     describe("PATCH", () => {
         xtest("Should return the comment specified", () => {
