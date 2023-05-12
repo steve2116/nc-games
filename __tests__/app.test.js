@@ -781,7 +781,7 @@ describe("/api/users/:username", () => {
 
 describe("/api/comments/:comment_id", () => {
     describe("PATCH", () => {
-        xtest("Should return the comment specified", () => {
+        test("Should return the specified comment", () => {
             const patchComment = { inc_votes: 0 };
             return request(app)
                 .patch("/api/comments/2")
@@ -792,7 +792,7 @@ describe("/api/comments/:comment_id", () => {
                     expect(comment_id).toBe(2);
                 });
         });
-        xtest("Should return the changed comment", () => {
+        test("Should return the changed comment", () => {
             const patchComment = { inc_votes: 4 };
             return request(app)
                 .patch("/api/comments/2")
@@ -809,7 +809,7 @@ describe("/api/comments/:comment_id", () => {
                     });
                 });
         });
-        xtest("Should respond with the correct error message when passed an invalid comment id", () => {
+        test("Should respond with the correct error message when passed an invalid comment id", () => {
             const patchComment = { inc_votes: 2 };
             return request(app)
                 .patch("/api/comments/nonsense")
@@ -820,7 +820,7 @@ describe("/api/comments/:comment_id", () => {
                     expect(msg).toBe("Invalid request");
                 });
         });
-        xtest("Should respond with the correct error message when passed a comment id that doesn't exist", () => {
+        test("Should respond with the correct error message when passed a comment id that doesn't exist", () => {
             const patchComment = { inc_votes: 3 };
             return request(app)
                 .patch("/api/comments/99999")
@@ -831,7 +831,7 @@ describe("/api/comments/:comment_id", () => {
                     expect(msg).toBe("Comment not found");
                 });
         });
-        xtest("Should not allow SQL injection", () => {
+        test("Should not allow SQL injection", () => {
             const patchComment = { inc_votes: 1 };
             return request(app)
                 .patch("/api/comments/2; DROP TABLE comments;")
@@ -839,10 +839,10 @@ describe("/api/comments/:comment_id", () => {
                 .expect(400)
                 .then((response) => {
                     const { msg } = response.body;
-                    expet(msg).toBe("Invalid request");
+                    expect(msg).toBe("Invalid request");
                 });
         });
-        xtest("Should respond with the correct error message when not passed a number", () => {
+        test("Should respond with the correct error message when not passed a number", () => {
             const patchComment = { inc_votes: "still a number definitely" };
             return request(app)
                 .patch("/api/comments/2")
@@ -853,7 +853,7 @@ describe("/api/comments/:comment_id", () => {
                     expect(msg).toBe("Invalid request");
                 });
         });
-        xtest("Should respond with the correct error message when not passed the correct key", () => {
+        test("Should respond with the correct error message when not passed the correct key", () => {
             const patchComment = { inc_voes: 2 };
             return request(app)
                 .patch("/api/comments/2")
@@ -864,7 +864,7 @@ describe("/api/comments/:comment_id", () => {
                     expect(msg).toBe("Invalid request");
                 });
         });
-        xtest("Should ignore any extra key-value pairs passed", () => {
+        test("Should ignore any extra key-value pairs passed", () => {
             const patchComment = { inc_votes: -5, dec_votes: 5, inc_voes: 2 };
             return request(app)
                 .patch("/api/comments/2")
@@ -881,9 +881,16 @@ describe("/api/comments/:comment_id", () => {
                     });
                 });
         });
-        xtest("Should respond with the correct error message when the body is formatted incorrectly", () => {
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
             const patchComment = "inc_votes,dec_votes\n2,1";
-            return request(app).patch("/api/");
+            return request(app)
+                .patch("/api/comments/2")
+                .send(patchComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
         });
     });
     describe("DELETE", () => {
