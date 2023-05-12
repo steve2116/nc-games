@@ -271,6 +271,176 @@ describe("/api/reviews", () => {
             });
         });
     });
+    describe.only("POST", () => {
+        test("Should respond with the posted review", () => {
+            const postReview = {
+                owner: "mallionaire",
+                title: "Town of Salem",
+                review_body: "Good game",
+                designer: "Dude",
+                category: "social deduction",
+                review_img_url:
+                    "'https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?w=700&h=700'",
+            };
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(201)
+                .then(({ body }) => {
+                    expect(body).hasOwnProperty("review");
+                });
+        });
+        test("Should respond with a correctly formatted review", () => {
+            const postReview = {
+                owner: "mallionaire",
+                title: "Town of Salem",
+                review_body: "Good game",
+                designer: "Dude",
+                category: "social deduction",
+                review_img_url:
+                    "'https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?w=700&h=700'",
+            };
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(201)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review).toMatchObject({
+                        owner: "mallionaire",
+                        title: "Town of Salem",
+                        review_body: "Good game",
+                        designer: "Dude",
+                        category: "social deduction",
+                        review_img_url:
+                            "'https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?w=700&h=700'",
+                        review_id: expect.any(Number),
+                        votes: 0,
+                        created_at: expect.any(String),
+                        comment_count: 0,
+                    });
+                });
+        });
+        test("Should have a default review_img_url", () => {
+            const postReview = {
+                owner: "mallionaire",
+                title: "Town of Salem",
+                review_body: "Good game",
+                designer: "Dude",
+                category: "social deduction",
+            };
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(201)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review.review_img_url).toEqual(expect.any(String));
+                });
+        });
+        test("Should respond with the correct error message when passed a category that doesn't exist", () => {
+            const postReview = {
+                owner: "mallionaire",
+                title: "Town of Salem",
+                review_body: "Good game",
+                designer: "Dude",
+                category: "DEFINTLY A CATEGORY",
+            };
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when not passed enough properties", () => {
+            const postReview = {
+                owner: "mallionaire",
+                title: "Town of Salem",
+                category: "social deduction",
+            };
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should ignore extra properties passed", () => {
+            const postReview = {
+                owner: "mallionaire",
+                title: "Town of Salem",
+                review_body: "Good game",
+                designer: "Dude",
+                category: "social deduction",
+                url: "a url",
+                pie: "yum",
+                VERYLONGSHOUTYWORD: "A VERY LONG SHOUTY SENTENCE",
+            };
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(201)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review).not.hasOwnProperty("url");
+                    expect(review).not.hasOwnProperty("pie");
+                    expect(review).not.hasOwnProperty("VERYLONGSHOUTYWORD");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const postReview = {
+                owner: "mallionaire",
+                title: "Town of Salem;DROP TABLE reviews;",
+                review_body: "Good game",
+                designer: "Dude",
+                category: "social deduction",
+            };
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(201)
+                .then((response) => {
+                    const { title } = response.body.review;
+                    expect(title).toBe("Town of Salem;DROP TABLE reviews;");
+                });
+        });
+        test("Should respond with the correct error message when passed an owner that doesn't exist", () => {
+            const postReview = {
+                owner: "DEFINTELY-AN-OWNER",
+                title: "Town of Salem",
+                review_body: "Good game",
+                designer: "Dude",
+                category: "social deduction",
+            };
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const postReview =
+                "owner,title,review_body,designer,category\nmallionaire,Town of Salem,Good game,Dude,social deduction";
+            return request(app)
+                .post("/api/reviews")
+                .send(postReview)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+    });
 });
 
 describe("/api/reviews/:review_id", () => {
