@@ -56,7 +56,18 @@ module.exports = {
                     categories: [categoryExample],
                 },
             },
-            post: {},
+            post: {
+                status: "OK",
+                info: "Creates a new category, then returns it",
+                data: "A category as an object with properties",
+                keys: ["slug", "description"],
+                queries: [],
+                "req-body": "json",
+                "res-body": "json",
+                example: {
+                    category: categoryExample,
+                },
+            },
         },
         "/api/reviews": {
             get: {
