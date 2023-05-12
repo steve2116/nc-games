@@ -764,6 +764,54 @@ describe("/api/reviews/:review_id", () => {
                 });
         });
     });
+    describe("DELETE", () => {
+        test("Should not respond with a body", () => {
+            return request(app)
+                .delete("/api/reviews/2")
+                .expect(204)
+                .then((response) => {
+                    const { body } = response;
+                    expect(Object.keys(body).length).toBe(0);
+                });
+        });
+        test("Should delete the review specified", () => {
+            return request(app)
+                .delete("/api/reviews/2")
+                .then(() => request(app).get("/api/reviews/2").expect(404));
+        });
+        test("Should delete all comments on that review", () => {
+            return request(app)
+                .delete("/api/reviews/2")
+                .then(() => request(app).get("/api/comments/4").expect(404));
+        });
+        test("Should respond with the correct error message when passed an invalid review id", () => {
+            return request(app)
+                .delete("/api/reviews/nonsense")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when passed a review id that doesn't exist", () => {
+            return request(app)
+                .delete("/api/reviews/99")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Review not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .delete("/api/reviews/2; DROP TABLE comments")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+    });
 });
 
 describe("/api/reviews/:review_id/comments", () => {

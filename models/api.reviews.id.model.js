@@ -37,3 +37,28 @@ exports.updateReviewById = (id, inc_votes) => {
             } else return data.rows[0];
         });
 };
+
+exports.removeReviewById = (id) => {
+    return db
+        .query(
+            `
+        DELETE FROM comments
+        WHERE review_id=$1
+    ;`,
+            [id]
+        )
+        .then(() => {
+            return db.query(
+                `
+            DELETE FROM reviews
+            WHERE review_id=$1
+            RETURNING review_id
+        ;`,
+                [id]
+            );
+        })
+        .then(({ rows }) => {
+            if (rows.length === 0)
+                return Promise.reject({ code: 404, msg: "Review not found" });
+        });
+};
