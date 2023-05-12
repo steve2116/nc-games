@@ -94,12 +94,13 @@ module.exports = {
                     "category",
                     "owner",
                     "created_at",
+                    "comment_count",
                 ],
                 queries: [],
                 "req-body": "none",
                 "res-body": "json",
                 example: {
-                    review: reviewDatawId,
+                    review: reviewsEx[1],
                 },
             },
             patch: {
