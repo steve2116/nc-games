@@ -159,7 +159,7 @@ module.exports = {
                     "body",
                     "review_id",
                 ],
-                queries: [],
+                queries: ["limit", "p"],
                 "req-body": "none",
                 "res-body": "json",
                 example: {

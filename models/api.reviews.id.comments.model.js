@@ -1,7 +1,9 @@
 const db = require("../db/connection.js");
 const format = require("pg-format");
 
-exports.selectCommentsByReviewId = (id) => {
+exports.selectCommentsByReviewId = (id, { limit, p }) => {
+    if (isNaN(limit) || limit < 1 || limit % 1 !== 0) limit = 10;
+    if (isNaN(p) || p < 1 || p % 1 !== 0) p = 1;
     return checkIdExists(id).then((exist) => {
         if (exist) {
             return db
@@ -11,6 +13,7 @@ exports.selectCommentsByReviewId = (id) => {
                 FROM comments
                 WHERE review_id=$1
                 ORDER BY created_at DESC
+                LIMIT ${limit} OFFSET ${(p - 1) * limit}
             ;`,
                     [id]
                 )
