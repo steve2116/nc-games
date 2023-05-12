@@ -5,7 +5,8 @@ const {
 
 exports.getCommentsByReviewId = (request, response, next) => {
     const { review_id } = request.params;
-    return selectCommentsByReviewId(review_id)
+    const queries = request.query;
+    return selectCommentsByReviewId(review_id, queries)
         .then((comments) => response.status(200).send({ comments: comments }))
         .catch((err) => {
             next(err);

@@ -750,6 +750,66 @@ describe("/api/reviews/:review_id/comments", () => {
                     expect(msg).toBe("Invalid request");
                 });
         });
+        describe("Queries", () => {
+            test('Should allow the user to query "limit"', () => {
+                return request(app)
+                    .get("/api/reviews/3/comments?limit=2")
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        expect(comments.length).toBe(2);
+                    });
+            });
+            test('Should allow the user to query "page number"', () => {
+                return request(app)
+                    .get("/api/reviews/3/comments?p=2")
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        expect(comments.length).toBe(0);
+                    });
+            });
+            test("Should allow multiple queries", () => {
+                return request(app)
+                    .get("/api/reviews/3/comments?limit=2&p=2")
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        expect(comments.length).toBe(1);
+                    });
+            });
+            test("Should ignore additional queries, or queries that don't exist", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews/3/comments?&category=social deduction&sort_by=title&order=asc&limit=2"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        expect(comments.length).toBe(2);
+                    });
+            });
+            test("Should ignore queries that aren't valid", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews/3/comments?limit=2&category=social deduction&sort_by=title&order=asc&19223784=[Function: HelloWorld=(Hello?) => undefined]"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        expect(comments.length).toBe(2);
+                    });
+            });
+            test("Should ignore SQL injection", () => {
+                return request(app)
+                    .get("/api/reviews/2/comments?limit=1;DROP TABLE reviews;")
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        expect(comments.length).toBe(3);
+                    });
+            });
+        });
     });
     describe("POST", () => {
         test("Should respond with the comment that has been added", () => {
