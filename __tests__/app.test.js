@@ -271,7 +271,7 @@ describe("/api/reviews", () => {
             });
         });
     });
-    describe.only("POST", () => {
+    describe("POST", () => {
         test("Should respond with the posted review", () => {
             const postReview = {
                 owner: "mallionaire",

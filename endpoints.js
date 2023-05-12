@@ -78,6 +78,26 @@ module.exports = {
                 "res-body": "json",
                 example: { reviews: [reviewsEx] },
             },
+            post: {
+                status: "OK",
+                info: "Creates a new review, then returns it",
+                data: "A review as an object with properties",
+                keys: [
+                    "owner",
+                    "title",
+                    "review_id",
+                    "category",
+                    "review_img_url",
+                    "created_at",
+                    "votes",
+                    "designer",
+                    "comment_count",
+                ],
+                queries: [],
+                "req-body": "json",
+                "res-body": "json",
+                example: { reviews: reviewsEx },
+            },
         },
         "/api/reviews/:review_id": {
             get: {
@@ -180,7 +200,21 @@ module.exports = {
         },
         "/api/comments/:comment_id": {
             patch: {
-                status: "under-maintenance",
+                status: "OK",
+                info: "Updates the specified comment, and returns it",
+                data: "The updated comment as an object with properties",
+                keys: [
+                    "comment_id",
+                    "votes",
+                    "created_at",
+                    "author",
+                    "body",
+                    "review_id",
+                ],
+                queries: [],
+                "req-body": "json",
+                "res-body": "json",
+                example: { comment: commentDatawId },
             },
             delete: {
                 status: "OK",
