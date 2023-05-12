@@ -6,12 +6,16 @@ const {
     getCommentsByReviewId,
     postCommentByReviewId,
 } = require("../../controllers/api.reviews.id.comments.controller.js");
-const { getReviews } = require("../../controllers/api.reviews.controller.js");
+const {
+    getReviews,
+    postReview,
+} = require("../../controllers/api.reviews.controller.js");
 const checkJson = require("../../middleware/json-body.js");
+const jsonBody = require("../../middleware/json-body.js");
 
 const reviewsRouter = require("express").Router();
 
-reviewsRouter.get("/", getReviews);
+reviewsRouter.get("/", getReviews).post("/", jsonBody, postReview);
 
 reviewsRouter
     .get("/:review_id", getReviewById)
