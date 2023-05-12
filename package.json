@@ -42,5 +42,9 @@
             "jest-extended/all",
             "jest-sorted"
         ]
+    },
+    "engines": {
+        "node": "^14.15.0 || >=16.0.0",
+        "pg": ">=14.7"
     }
 }
