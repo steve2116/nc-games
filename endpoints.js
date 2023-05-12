@@ -56,6 +56,7 @@ module.exports = {
                     categories: [categoryExample],
                 },
             },
+            post: {},
         },
         "/api/reviews": {
             get: {

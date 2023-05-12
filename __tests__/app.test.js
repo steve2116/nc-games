@@ -103,6 +103,35 @@ describe("/api/categories", () => {
                 });
         });
     });
+    describe("POST", () => {
+        xtest("Should respond with the posted category", () => {
+            const postCategory = {
+                slug: "shouty",
+                description: "very loud",
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .expect(201)
+                .then((response) => {
+                    const { body } = response;
+                    expect(body).hasOwnProperty("category");
+                });
+        });
+        xtest("Should respond with the category formatted correctly", () => {
+            const postCategory = {
+                slug: "shouty",
+                description: "very loud",
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toEqual(postCategory);
+                });
+        });
+    });
 });
 
 describe("/api/reviews", () => {
