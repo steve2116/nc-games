@@ -103,6 +103,96 @@ describe("/api/categories", () => {
                 });
         });
     });
+    describe("POST", () => {
+        test("Should respond with the posted category", () => {
+            const postCategory = {
+                slug: "shouty",
+                description: "very loud",
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .expect(201)
+                .then((response) => {
+                    const { body } = response;
+                    expect(body).hasOwnProperty("category");
+                });
+        });
+        test("Should respond with the category formatted correctly", () => {
+            const postCategory = {
+                slug: "shouty",
+                description: "very loud",
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toEqual(postCategory);
+                });
+        });
+        test("Should respond with the correct error message when not passed enough properties", () => {
+            const postCategory = {
+                slug: "shouty",
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should ignore extra properties passed", () => {
+            const postCategory = {
+                slug: "shouty",
+                description: "very loud",
+                console: "log",
+                log: "console",
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .expect(201)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toMatchObject({
+                        slug: "shouty",
+                        description: "very loud",
+                    });
+                    expect(category).not.hasOwnProperty("console");
+                    expect(category).not.hasOwnProperty("log");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const postCategory = {
+                slug: "shouty",
+                description: "very loud; DROP TABLE categories;",
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .expect(201)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toEqual(postCategory);
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const postCategory = "slug,description\nshouty,very loud";
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+    });
 });
 
 describe("/api/reviews", () => {

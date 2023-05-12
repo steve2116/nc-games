@@ -1,15 +1,15 @@
 const getEndPoints = require("../controllers/api.controller.js");
-const { getCategories } = require("../controllers/api.categories.controller");
 
 const reviewsRouter = require("./reviews/reviews-router.js");
 const usersRouter = require("./users/users-router.js");
 const commentsRouter = require("./comments/comments-router.js");
+const categoryRouter = require("./categories/categories-router.js");
 
 const apiRouter = require("express").Router();
 
 apiRouter.get("/", getEndPoints);
 
-apiRouter.get("/categories", getCategories);
+apiRouter.use("/categories", categoryRouter);
 
 apiRouter.use("/reviews", reviewsRouter);
 
