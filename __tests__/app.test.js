@@ -345,6 +345,15 @@ describe("/api/reviews/:review_id", () => {
                     expect(msg).toBe("Invalid request");
                 });
         });
+        test("Should now also include comment_count in the response", () => {
+            return request(app)
+                .get("/api/reviews/2")
+                .expect(200)
+                .then((response) => {
+                    const { review } = response.body;
+                    expect(review.comment_count == 3).toBe(true);
+                });
+        });
     });
     describe("PATCH", () => {
         test("Should respond with the review", () => {
