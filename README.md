@@ -47,7 +47,7 @@ You will need to add your own environment variables, including:
 -   Development database (.env.development) > PGDATABASE=nc_games
 -   Test database (.env.test) > PGDATABASE=nc_games_test
 
-If you would like to use your own databases, change the files to contain PGDATABASE=<database_name> instead.
+If you would like to use your own databases, change the files to contain PGDATABASE=<database_name> instead, as well as changing "/db/setup.sql" to match these changes.
 
 ## Requirements
 
