@@ -157,6 +157,16 @@ module.exports = {
                     review: reviewDatawId,
                 },
             },
+            delete: {
+                status: "OK",
+                info: "Deletes the specified review",
+                data: "none",
+                keys: [],
+                queries: [],
+                "req-body": "none",
+                "res-body": "none",
+                example: null,
+            },
         },
         "/api/reviews/:review_id/comments": {
             get: {

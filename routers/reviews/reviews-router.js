@@ -1,6 +1,7 @@
 const {
     getReviewById,
     patchReviewById,
+    deleteReviewById,
 } = require("../../controllers/api.reviews.id.controller.js");
 const {
     getCommentsByReviewId,
@@ -19,7 +20,8 @@ reviewsRouter.get("/", getReviews).post("/", jsonBody, postReview);
 
 reviewsRouter
     .get("/:review_id", getReviewById)
-    .patch("/:review_id", checkJson, patchReviewById);
+    .patch("/:review_id", checkJson, patchReviewById)
+    .delete("/:review_id", deleteReviewById);
 
 reviewsRouter
     .get("/:review_id/comments", getCommentsByReviewId)
