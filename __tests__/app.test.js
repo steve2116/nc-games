@@ -780,6 +780,119 @@ describe("/api/users/:username", () => {
 });
 
 describe("/api/comments/:comment_id", () => {
+    describe("PATCH", () => {
+        test("Should return the specified comment", () => {
+            const patchComment = { inc_votes: 0 };
+            return request(app)
+                .patch("/api/comments/2")
+                .send(patchComment)
+                .expect(200)
+                .then((response) => {
+                    const { comment_id } = response.body.comment;
+                    expect(comment_id).toBe(2);
+                });
+        });
+        test("Should return the changed comment", () => {
+            const patchComment = { inc_votes: 4 };
+            return request(app)
+                .patch("/api/comments/2")
+                .send(patchComment)
+                .expect(200)
+                .then((response) => {
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        body: "My dog loved this game too!",
+                        votes: 17,
+                        author: "mallionaire",
+                        review_id: 3,
+                        created_at: expect.any(String),
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed an invalid comment id", () => {
+            const patchComment = { inc_votes: 2 };
+            return request(app)
+                .patch("/api/comments/nonsense")
+                .send(patchComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when passed a comment id that doesn't exist", () => {
+            const patchComment = { inc_votes: 3 };
+            return request(app)
+                .patch("/api/comments/99999")
+                .send(patchComment)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Comment not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const patchComment = { inc_votes: 1 };
+            return request(app)
+                .patch("/api/comments/2; DROP TABLE comments;")
+                .send(patchComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when not passed a number", () => {
+            const patchComment = { inc_votes: "still a number definitely" };
+            return request(app)
+                .patch("/api/comments/2")
+                .send(patchComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when not passed the correct key", () => {
+            const patchComment = { inc_voes: 2 };
+            return request(app)
+                .patch("/api/comments/2")
+                .send(patchComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should ignore any extra key-value pairs passed", () => {
+            const patchComment = { inc_votes: -5, dec_votes: 5, inc_voes: 2 };
+            return request(app)
+                .patch("/api/comments/2")
+                .send(patchComment)
+                .expect(200)
+                .then((response) => {
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        body: "My dog loved this game too!",
+                        votes: 8,
+                        author: "mallionaire",
+                        review_id: 3,
+                        created_at: expect.any(String),
+                    });
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const patchComment = "inc_votes,dec_votes\n2,1";
+            return request(app)
+                .patch("/api/comments/2")
+                .send(patchComment)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+    });
     describe("DELETE", () => {
         test("Should respond with no body and a 204 status code", () => {
             return request(app)

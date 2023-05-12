@@ -15,3 +15,21 @@ exports.removeCommentById = (id) => {
                 return Promise.reject({ code: 404, msg: "Comment not found" });
         });
 };
+
+exports.updateCommentById = (id, inc_votes) => {
+    return db
+        .query(
+            `
+        UPDATE comments
+        SET votes = votes + $2
+        WHERE comment_id=$1
+        RETURNING *
+    ;`,
+            [id, inc_votes]
+        )
+        .then(({ rows }) => {
+            if (rows.length === 0)
+                return Promise.reject({ code: 404, msg: "Comment not found" });
+            else return rows[0];
+        });
+};

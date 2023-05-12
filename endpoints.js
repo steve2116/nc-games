@@ -166,18 +166,6 @@ module.exports = {
                 },
             },
         },
-        "/api/comments/:comment_id": {
-            delete: {
-                status: "OK",
-                info: "Deletes the specified comment",
-                data: "none",
-                keys: [],
-                queries: [],
-                "req-body": "none",
-                "res-body": "none",
-                example: null,
-            },
-        },
         "/api/users": {
             get: {
                 status: "OK",
@@ -188,6 +176,21 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: { users: [userExample] },
+            },
+        },
+        "/api/comments/:comment_id": {
+            patch: {
+                status: "under-maintenance",
+            },
+            delete: {
+                status: "OK",
+                info: "Deletes the specified comment",
+                data: "none",
+                keys: [],
+                queries: [],
+                "req-body": "none",
+                "res-body": "none",
+                example: null,
             },
         },
     },
