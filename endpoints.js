@@ -60,7 +60,7 @@ module.exports = {
         "/api/reviews": {
             get: {
                 status: "OK",
-                info: "Returns a list of reviews",
+                info: "Returns a list of reviews and a count of total reviews",
                 data: "Each review as an object with properties.",
                 keys: [
                     "owner",
@@ -73,10 +73,10 @@ module.exports = {
                     "designer",
                     "comment_count",
                 ],
-                queries: ["category", "sort_by", "order"],
+                queries: ["category", "sort_by", "order", "limit", "p"],
                 "req-body": "none",
                 "res-body": "json",
-                example: { reviews: [reviewsEx] },
+                example: { reviews: [reviewsEx], total_count: 12 },
             },
             post: {
                 status: "OK",

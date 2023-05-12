@@ -109,7 +109,7 @@ describe("/api/reviews", () => {
     describe("GET", () => {
         test("Should respond with an array with the correct amount of reviews", () => {
             return request(app)
-                .get("/api/reviews")
+                .get("/api/reviews?limit=14")
                 .expect(200)
                 .then((response) => {
                     const { reviews } = response.body;
@@ -210,7 +210,7 @@ describe("/api/reviews", () => {
             test("Should allow multiple queries", () => {
                 return request(app)
                     .get(
-                        "/api/reviews?category=social deduction&sort_by=title&order=asc"
+                        "/api/reviews?category=social deduction&sort_by=title&order=asc&limit=20"
                     )
                     .expect(200)
                     .then((response) => {
@@ -227,7 +227,7 @@ describe("/api/reviews", () => {
             test("Should ignore additional queries, or queries that don't exist", () => {
                 return request(app)
                     .get(
-                        "/api/reviews?category=social deduction&sort_by=title&order=asc&limit=3"
+                        "/api/reviews?&category=social deduction&sort_by=title&order=asc&limit=15"
                     )
                     .expect(200)
                     .then((response) => {
@@ -244,7 +244,7 @@ describe("/api/reviews", () => {
             test("Should ignore queries that aren't valid", () => {
                 return request(app)
                     .get(
-                        "/api/reviews?category=social deduction&sort_by=title&order=asc&19223784=[Function: HelloWorld=(Hello?) => undefined]"
+                        "/api/reviews?limit=15&category=social deduction&sort_by=title&order=asc&19223784=[Function: HelloWorld=(Hello?) => undefined]"
                     )
                     .expect(200)
                     .then((response) => {
@@ -267,6 +267,33 @@ describe("/api/reviews", () => {
                     .then((response) => {
                         const { reviews } = response.body;
                         expect(reviews.length).toBe(0);
+                    });
+            });
+            test('Should allow the user to query "limit"', () => {
+                return request(app)
+                    .get("/api/reviews?limit=3")
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(3);
+                    });
+            });
+            test('Should allow the user to query "page number"', () => {
+                return request(app)
+                    .get("/api/reviews?p=2&category=social deduction")
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(1);
+                    });
+            });
+            test('Should have a "total_count" property, displaying total number of articles with specified queries', () => {
+                return request(app)
+                    .get("/api/reviews?limit=7&p=2&category=social deduction")
+                    .then((response) => {
+                        const { reviews, total_count } = response.body;
+                        expect(reviews.length).toBe(4);
+                        expect(total_count).toBe(11);
                     });
             });
         });
