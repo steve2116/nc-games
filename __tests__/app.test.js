@@ -737,7 +737,7 @@ describe("/api/users", () => {
 
 describe("/api/users/:username", () => {
     describe("GET", () => {
-        xtest("Should respond with a user", () => {
+        test("Should respond with a user", () => {
             return request(app)
                 .get("/api/users/mallionaire")
                 .expect(200)
@@ -745,7 +745,7 @@ describe("/api/users/:username", () => {
                     expect(response.body).hasOwnProperty("user");
                 });
         });
-        xtest("Should respond with a correctly formatted user", () => {
+        test("Should respond with a correctly formatted user", () => {
             return request(app)
                 .get("/api/users/mallionaire")
                 .then((response) => {
@@ -758,19 +758,19 @@ describe("/api/users/:username", () => {
                     });
                 });
         });
-        xtest("Should respond with the correct error when passed a username that doesn't exist", () => {
+        test("Should respond with the correct error when passed a username that doesn't exist", () => {
             return request(app)
                 .get("/api/users/99999999kasjhdaksjdh")
-                .status(404)
+                .expect(404)
                 .then((response) => {
                     const { msg } = response.body;
                     expect(msg).toBe("User not found");
                 });
         });
-        xtest("Should not allow SQL injection", () => {
+        test("Should not allow SQL injection", () => {
             return request(app)
                 .get("/api/users/mallionaire; DROP TABLE users;")
-                .status(404)
+                .expect(404)
                 .then((response) => {
                     const { msg } = response.body;
                     expect(msg).toBe("User not found");
