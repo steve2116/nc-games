@@ -195,6 +195,41 @@ describe("/api/categories", () => {
     });
 });
 
+describe("/api/categories/:slug", () => {
+    describe.only("GET", () => {
+        test("Should respond with the specified category", () => {
+            return request(app)
+                .get("/api/categories/euro game")
+                .expect(200)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toMatchObject({
+                        slug: "euro game",
+                        description: "Abstact games that involve little luck",
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed a slug that doesn't exist", () => {
+            return request(app)
+                .get("/api/categories/ishfhsdbcnonsense")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .get("/api/categories/dexterity; DROP TABLE categories")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+    });
+});
+
 describe("/api/reviews", () => {
     describe("GET", () => {
         test("Should respond with an array with the correct amount of reviews", () => {
