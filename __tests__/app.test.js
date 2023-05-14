@@ -196,7 +196,7 @@ describe("/api/categories", () => {
 });
 
 describe("/api/categories/:slug", () => {
-    describe.only("GET", () => {
+    describe("GET", () => {
         test("Should respond with the specified category", () => {
             return request(app)
                 .get("/api/categories/euro game")
@@ -225,6 +225,97 @@ describe("/api/categories/:slug", () => {
                 .then((response) => {
                     const { msg } = response.body;
                     expect(msg).toBe("Category not found");
+                });
+        });
+    });
+    describe("PATCH", () => {
+        test("Should respond with the updated category", () => {
+            const patchCategory = {
+                description: "UPDATED",
+            };
+            return request(app)
+                .patch("/api/categories/euro game")
+                .send(patchCategory)
+                .expect(200)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toMatchObject({
+                        slug: "euro game",
+                        description: "UPDATED",
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed a slug that doesn't exist", () => {
+            const patchCategory = {
+                description: "UPDATED",
+            };
+            return request(app)
+                .patch("/api/categories/aohercn8237rcy3q7n2")
+                .send(patchCategory)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const patchCategory = {
+                description: "UPDATED; DROP TABLE categories",
+            };
+            return request(app)
+                .patch("/api/categories/euro game; DROP TABLE comments;")
+                .send(patchCategory)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+        test("Should respond with the correct error message when not passed a description", () => {
+            const patchCategory = {
+                descritoton: "UPDATED??",
+            };
+            return request(app)
+                .patch("/api/categories/euro game")
+                .send(patchCategory)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should ignore extra properties passed", () => {
+            const patchCategory = {
+                description: "UPDATED",
+                found: "askjdhaskjd",
+                slug: "iaeufhniweufn847wg 84w7gw7 ",
+                AIUDHNIAWUO: '9YNC9787g87BGygN8GN8GN87GN87&!%$"&^',
+            };
+            return request(app)
+                .patch("/api/categories/euro game")
+                .send(patchCategory)
+                .expect(200)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toMatchObject({
+                        slug: "euro game",
+                        description: "UPDATED",
+                    });
+                    expect(category).not.hasOwnProperty("found");
+                    expect(category).not.hasOwnProperty("AIUDHNIAWUO");
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const patchCategory = "description\nUPDATED";
+            return request(app)
+                .patch("/api/categories/euro game")
+                .send(patchCategory)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
                 });
         });
     });

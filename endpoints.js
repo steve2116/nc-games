@@ -69,6 +69,32 @@ module.exports = {
                 },
             },
         },
+        "/api/categories/:slug": {
+            get: {
+                status: "OK",
+                info: "Returns the specified category",
+                data: "The category as an object with properties",
+                keys: ["slug", "description"],
+                queries: [],
+                "req-body": "none",
+                "res-body": "json",
+                example: {
+                    category: categoryExample,
+                },
+            },
+            patch: {
+                status: "OK",
+                info: "Updates a category, and then returns it",
+                data: "The updated category as an object with properties",
+                keys: ["slug", "description"],
+                queries: [],
+                "req-body": "json",
+                "res-body": "json",
+                example: {
+                    category: categoryExample,
+                },
+            },
+        },
         "/api/reviews": {
             get: {
                 status: "OK",
@@ -218,6 +244,20 @@ module.exports = {
                 "req-body": "none",
                 "res-body": "json",
                 example: { users: [userExample] },
+            },
+        },
+        "/api/users/:username": {
+            get: {
+                status: "OK",
+                info: "Returns the specified user",
+                data: "The user as an object with properties",
+                keys: ["username", "name", "avatar_url"],
+                queries: [],
+                "req-body": "none",
+                "res-body": "json",
+                example: {
+                    user: userExample,
+                },
             },
         },
         "/api/comments/:comment_id": {
