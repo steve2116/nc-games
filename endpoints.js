@@ -97,6 +97,7 @@ module.exports = {
             delete: {
                 status: "OK",
                 info: "Deletes the specified category and all related reviews and comments",
+                data: "none",
                 keys: [],
                 queries: [],
                 "req-body": "none",
@@ -287,6 +288,16 @@ module.exports = {
                 "req-body": "json",
                 "res-body": "json",
                 example: { user: userExample },
+            },
+            delete: {
+                status: "OK",
+                info: "Deletes the specified user and all related reviews and comments",
+                data: "none",
+                keys: [],
+                queries: [],
+                "req-body": "none",
+                "res-body": "none",
+                example: null,
             },
         },
         "/api/comments/:comment_id": {

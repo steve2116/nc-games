@@ -346,16 +346,24 @@ describe("/api/categories/:slug", () => {
             return request(app)
                 .delete("/api/categories/social deduction")
                 .then(() => {
-                    return request(app)
-                        .get("/api/categories/social deduction")
-                        .expect(404);
+                    return db.query(
+                        "SELECT * FROM categories WHERE slug='social deduction'"
+                    );
+                })
+                .then(({ rows }) => {
+                    expect(rows.length).toBe(0);
                 });
         });
         test("Should delete related data", () => {
             return request(app)
                 .delete("/api/categories/euro game")
                 .then(() => {
-                    return request(app).get("/api/reviews/1").expect(404);
+                    return db.query(
+                        "SELECT review_id FROM reviews WHERE category='euro game'"
+                    );
+                })
+                .then(({ rows }) => {
+                    expect(rows.length).toBe(0);
                 });
         });
         test("Should respond with the correct error message when passed a category that doesn't exist", () => {
@@ -1560,6 +1568,46 @@ describe("/api/users/:username", () => {
                 .then((response) => {
                     const { msg } = response.body;
                     expect(msg).toBe("Invalid body format");
+                });
+        });
+    });
+    describe("DELETE", () => {
+        test("Should respond with an empty body", () => {
+            return request(app)
+                .delete("/api/users/mallionaire")
+                .expect(204)
+                .then(({ body }) => {
+                    expect(Object.keys(body).length).toBe(0);
+                });
+        });
+        test("Should delete the specified user", () => {
+            return request(app)
+                .delete("/api/users/mallionaire")
+                .then(() => {
+                    return db.query(
+                        "SELECT * FROM users WHERE username='mallionaire'"
+                    );
+                })
+                .then(({ rows }) => {
+                    expect(rows.length).toBe(0);
+                });
+        });
+        test("Should respond with the correct error message when passed a user that doesn't exist", () => {
+            return request(app)
+                .delete("/api/users/nonsense")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .delete("/api/users/mallionaire; DROP TABLE reviews;")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
                 });
         });
     });
