@@ -128,7 +128,7 @@ describe("/api/categories", () => {
                 .send(postCategory)
                 .then((response) => {
                     const { category } = response.body;
-                    expect(category).toEqual(postCategory);
+                    expect(category).toMatchObject({ ...postCategory });
                 });
         });
         test("Should respond with the correct error message when not passed enough properties", () => {
@@ -178,7 +178,7 @@ describe("/api/categories", () => {
                 .expect(201)
                 .then((response) => {
                     const { category } = response.body;
-                    expect(category).toEqual(postCategory);
+                    expect(category).toMatchObject({ ...postCategory });
                 });
         });
         test("Should respond with the correct error message when the body is formatted incorrectly", () => {
@@ -190,6 +190,198 @@ describe("/api/categories", () => {
                 .then((response) => {
                     const { msg } = response.body;
                     expect(msg).toBe("Invalid body format");
+                });
+        });
+        test("Should respond with the correct error message when category already exists", () => {
+            const postCategory = {
+                slug: "social deduction",
+                description: 'new description for "social deduction"',
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .expect(409)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category already exists");
+                });
+        });
+    });
+});
+
+describe("/api/categories/:slug", () => {
+    describe("GET", () => {
+        test("Should respond with the specified category", () => {
+            return request(app)
+                .get("/api/categories/euro game")
+                .expect(200)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toMatchObject({
+                        slug: "euro game",
+                        description: "Abstact games that involve little luck",
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed a slug that doesn't exist", () => {
+            return request(app)
+                .get("/api/categories/ishfhsdbcnonsense")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .get("/api/categories/dexterity; DROP TABLE categories")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+    });
+    describe("PATCH", () => {
+        test("Should respond with the updated category", () => {
+            const patchCategory = {
+                description: "UPDATED",
+            };
+            return request(app)
+                .patch("/api/categories/euro game")
+                .send(patchCategory)
+                .expect(200)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toMatchObject({
+                        slug: "euro game",
+                        description: "UPDATED",
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed a slug that doesn't exist", () => {
+            const patchCategory = {
+                description: "UPDATED",
+            };
+            return request(app)
+                .patch("/api/categories/aohercn8237rcy3q7n2")
+                .send(patchCategory)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const patchCategory = {
+                description: "UPDATED; DROP TABLE categories",
+            };
+            return request(app)
+                .patch("/api/categories/euro game; DROP TABLE comments;")
+                .send(patchCategory)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+        test("Should respond with the correct error message when not passed a description", () => {
+            const patchCategory = {
+                descritoton: "UPDATED??",
+            };
+            return request(app)
+                .patch("/api/categories/euro game")
+                .send(patchCategory)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should ignore extra properties passed", () => {
+            const patchCategory = {
+                description: "UPDATED",
+                found: "askjdhaskjd",
+                slug: "iaeufhniweufn847wg 84w7gw7 ",
+                AIUDHNIAWUO: '9YNC9787g87BGygN8GN8GN87GN87&!%$"&^',
+            };
+            return request(app)
+                .patch("/api/categories/euro game")
+                .send(patchCategory)
+                .expect(200)
+                .then((response) => {
+                    const { category } = response.body;
+                    expect(category).toMatchObject({
+                        slug: "euro game",
+                        description: "UPDATED",
+                    });
+                    expect(category).not.hasOwnProperty("found");
+                    expect(category).not.hasOwnProperty("AIUDHNIAWUO");
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const patchCategory = "description\nUPDATED";
+            return request(app)
+                .patch("/api/categories/euro game")
+                .send(patchCategory)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+    });
+    describe("DELETE", () => {
+        test("Should respond with no body", () => {
+            return request(app)
+                .delete("/api/categories/euro game")
+                .expect(204)
+                .then(({ body }) => {
+                    expect(Object.keys(body).length).toBe(0);
+                });
+        });
+        test("Should delete the specified category", () => {
+            return request(app)
+                .delete("/api/categories/social deduction")
+                .then(() => {
+                    return db.query(
+                        "SELECT * FROM categories WHERE slug='social deduction'"
+                    );
+                })
+                .then(({ rows }) => {
+                    expect(rows.length).toBe(0);
+                });
+        });
+        test("Should delete related data", () => {
+            return request(app)
+                .delete("/api/categories/euro game")
+                .then(() => {
+                    return db.query(
+                        "SELECT review_id FROM reviews WHERE category='euro game'"
+                    );
+                })
+                .then(({ rows }) => {
+                    expect(rows.length).toBe(0);
+                });
+        });
+        test("Should respond with the correct error message when passed a category that doesn't exist", () => {
+            return request(app)
+                .delete("/api/categories/ajdfakhfanonsense")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .delete("/api/categories/euro game; DROP TABLE categories;")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
                 });
         });
     });
@@ -1128,6 +1320,114 @@ describe("/api/users", () => {
                 });
         });
     });
+    describe("POST", () => {
+        test("Should respond with the user that has been added", () => {
+            const postUser = {
+                username: "steve2116",
+                name: "Stevie",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(201)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        ...postUser,
+                    });
+                });
+        });
+        test("Should respond with the correct error message when not passed enough properties", () => {
+            const postUser = {
+                username: "steve2116",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should ignore extra properties passed", () => {
+            const postUser = {
+                username: "steve2116",
+                name: "Stevie",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4",
+                cheese: "rat",
+                rat: "not mouse",
+                mouse: "cheese",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(201)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        username: "steve2116",
+                        name: "Stevie",
+                        avatar_url:
+                            "https://avatars.githubusercontent.com/u/99140971?v=4",
+                    });
+                    expect(user).not.hasOwnProperty("cheese");
+                    expect(user).not.hasOwnProperty("rat");
+                    expect(user).not.hasOwnProperty("mouse");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const postUser = {
+                username: "steve2116; DROP TABLE reviews;",
+                name: "Stevie; DROP TABLE comments",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4; DROP TABLE categories;",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(201)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({ ...postUser });
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const postUser =
+                "username,name,avatar_url\nsteve2116,Stevie,https://avatars.githubusercontent.com/u/99140971?v=4";
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+        test("Should respond with the correct error message when the user already exists", () => {
+            const postUser = {
+                username: "mallionaire",
+                name: "anything",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(409)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User already exists");
+                });
+        });
+    });
 });
 
 describe("/api/users/:username", () => {
@@ -1172,9 +1472,201 @@ describe("/api/users/:username", () => {
                 });
         });
     });
+    describe("PATCH", () => {
+        test("Should respond with the updated user", () => {
+            const patchUser = {
+                name: "Hazzer",
+                avatar_url:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+            };
+            return request(app)
+                .patch("/api/users/mallionaire")
+                .send(patchUser)
+                .expect(200)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        username: "mallionaire",
+                        ...patchUser,
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed a username that doesn't exist", () => {
+            const patchUser = {
+                name: "Hazzer",
+                avatar_url:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+            };
+            return request(app)
+                .patch("/api/users/nonsenseajsdnasjd")
+                .send(patchUser)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const patchUser = {
+                name: "Hazzer",
+                avatar_url:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+            };
+            return request(app)
+                .patch("/api/users/mallionaire; DROP TABLE reviews;")
+                .send(patchUser)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+        test("Should respond with the correct error message when not passed the correct properties", () => {
+            const patchUser = {
+                nae: "Hazzer",
+                avaar_url:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+            };
+            return request(app)
+                .patch("/api/users/mallionaire")
+                .send(patchUser)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should ignore extra properties", () => {
+            const patchUser = {
+                name: "Hazzer; DROP TABLE categories;",
+                avatar_urlasdasd:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+                cheese: "cat",
+            };
+            return request(app)
+                .patch("/api/users/mallionaire")
+                .send(patchUser)
+                .expect(200)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        name: "Hazzer; DROP TABLE categories;",
+                    });
+                    expect(user).not.hasOwnProperty("avatar_urlasdasd");
+                    expect(user).not.hasOwnProperty("cheese");
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const postUser =
+                "name,avatar_url\nHazzer,https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api";
+            return request(app)
+                .patch("/api/users/mallionaire")
+                .send(postUser)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+    });
+    describe("DELETE", () => {
+        test("Should respond with an empty body", () => {
+            return request(app)
+                .delete("/api/users/mallionaire")
+                .expect(204)
+                .then(({ body }) => {
+                    expect(Object.keys(body).length).toBe(0);
+                });
+        });
+        test("Should delete the specified user", () => {
+            return request(app)
+                .delete("/api/users/mallionaire")
+                .then(() => {
+                    return db.query(
+                        "SELECT * FROM users WHERE username='mallionaire'"
+                    );
+                })
+                .then(({ rows }) => {
+                    expect(rows.length).toBe(0);
+                });
+        });
+        test("Should respond with the correct error message when passed a user that doesn't exist", () => {
+            return request(app)
+                .delete("/api/users/nonsense")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .delete("/api/users/mallionaire; DROP TABLE reviews;")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+    });
 });
 
 describe("/api/comments/:comment_id", () => {
+    describe("GET", () => {
+        test("Should respond with a comment", () => {
+            return request(app)
+                .get("/api/comments/2")
+                .expect(200)
+                .then((response) => {
+                    const { body } = response;
+                    expect(body).hasOwnProperty("comment");
+                });
+        });
+        test("Should respond with the specified comment formatted correctly", () => {
+            return request(app)
+                .get("/api/comments/2")
+                .then((response) => {
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: 13,
+                        created_at: expect.any(String),
+                        author: "mallionaire",
+                        body: "My dog loved this game too!",
+                        review_id: 3,
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed an invalid comment id", () => {
+            return request(app)
+                .get("/api/comments/nonsense")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when passed a comment id that doesn't exist", () => {
+            return request(app)
+                .get("/api/comments/99")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Comment not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .get("/api/comments/2; DROP TABLE reviews")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+    });
     describe("PATCH", () => {
         test("Should return the specified comment", () => {
             const patchComment = { inc_votes: 0 };
