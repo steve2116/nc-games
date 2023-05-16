@@ -5,6 +5,7 @@ const {
 const {
     getCategoryBySlug,
     patchCategoryBySlug,
+    deleteCategoryBySlug,
 } = require("../../controllers/api.categories.slug.controller");
 const jsonBody = require("../../middleware/json-body");
 
@@ -14,6 +15,7 @@ categoryRouter.get("/", getCategories).post("/", jsonBody, postCategory);
 
 categoryRouter
     .get("/:slug", getCategoryBySlug)
-    .patch("/:slug", jsonBody, patchCategoryBySlug);
+    .patch("/:slug", jsonBody, patchCategoryBySlug)
+    .delete("/:slug", deleteCategoryBySlug);
 
 module.exports = categoryRouter;

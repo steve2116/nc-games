@@ -319,6 +319,50 @@ describe("/api/categories/:slug", () => {
                 });
         });
     });
+    describe("DELETE", () => {
+        test("Should respond with no body", () => {
+            return request(app)
+                .delete("/api/categories/euro game")
+                .expect(204)
+                .then(({ body }) => {
+                    expect(Object.keys(body).length).toBe(0);
+                });
+        });
+        test("Should delete the specified category", () => {
+            return request(app)
+                .delete("/api/categories/social deduction")
+                .then(() => {
+                    return request(app)
+                        .get("/api/categories/social deduction")
+                        .expect(404);
+                });
+        });
+        test("Should delete related data", () => {
+            return request(app)
+                .delete("/api/categories/euro game")
+                .then(() => {
+                    return request(app).get("/api/reviews/1").expect(404);
+                });
+        });
+        test("Should respond with the correct error message when passed a category that doesn't exist", () => {
+            return request(app)
+                .delete("/api/categories/ajdfakhfanonsense")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .delete("/api/categories/euro game; DROP TABLE categories;")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category not found");
+                });
+        });
+    });
 });
 
 describe("/api/reviews", () => {

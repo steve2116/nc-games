@@ -94,6 +94,15 @@ module.exports = {
                     category: categoryExample,
                 },
             },
+            delete: {
+                status: "OK",
+                info: "Deletes the specified category and all related reviews and comments",
+                keys: [],
+                queries: [],
+                "req-body": "none",
+                "res-body": "none",
+                example: null,
+            },
         },
         "/api/reviews": {
             get: {
@@ -185,7 +194,7 @@ module.exports = {
             },
             delete: {
                 status: "OK",
-                info: "Deletes the specified review",
+                info: "Deletes the specified review and all related comments",
                 data: "none",
                 keys: [],
                 queries: [],
