@@ -1,9 +1,10 @@
 const { customErrors, psqlErrors, noneCaught } = require("../errorhandlers.js");
 
 const errorRouter = (err, request, response, next) => {
-    customErrors(err, request, response, next);
-    psqlErrors(err, request, response, next);
-    noneCaught(err, request, response, next);
+    request.app.use(customErrors);
+    request.app.use(psqlErrors);
+    request.app.use(noneCaught);
+    next(err);
 };
 
 module.exports = errorRouter;

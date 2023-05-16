@@ -254,6 +254,16 @@ module.exports = {
                 "res-body": "json",
                 example: { users: [userExample] },
             },
+            post: {
+                status: "OK",
+                info: "Creates a new user, then returns it",
+                data: "The user as an object with properties",
+                keys: ["username", "name", "avatar_url"],
+                queries: [],
+                "req-body": "json",
+                "res-body": "json",
+                example: { user: userExample },
+            },
         },
         "/api/users/:username": {
             get: {

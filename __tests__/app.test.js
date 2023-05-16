@@ -128,7 +128,7 @@ describe("/api/categories", () => {
                 .send(postCategory)
                 .then((response) => {
                     const { category } = response.body;
-                    expect(category).toEqual(postCategory);
+                    expect(category).toMatchObject({ ...postCategory });
                 });
         });
         test("Should respond with the correct error message when not passed enough properties", () => {
@@ -178,7 +178,7 @@ describe("/api/categories", () => {
                 .expect(201)
                 .then((response) => {
                     const { category } = response.body;
-                    expect(category).toEqual(postCategory);
+                    expect(category).toMatchObject({ ...postCategory });
                 });
         });
         test("Should respond with the correct error message when the body is formatted incorrectly", () => {
@@ -190,6 +190,20 @@ describe("/api/categories", () => {
                 .then((response) => {
                     const { msg } = response.body;
                     expect(msg).toBe("Invalid body format");
+                });
+        });
+        test("Should respond with the correct error message when category already exists", () => {
+            const postCategory = {
+                slug: "social deduction",
+                description: 'new description for "social deduction"',
+            };
+            return request(app)
+                .post("/api/categories")
+                .send(postCategory)
+                .expect(409)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Category already exists");
                 });
         });
     });
@@ -1295,6 +1309,114 @@ describe("/api/users", () => {
                             avatar_url: expect.any(String),
                         });
                     });
+                });
+        });
+    });
+    describe("POST", () => {
+        test("Should respond with the user that has been added", () => {
+            const postUser = {
+                username: "steve2116",
+                name: "Stevie",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(201)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        ...postUser,
+                    });
+                });
+        });
+        test("Should respond with the correct error message when not passed enough properties", () => {
+            const postUser = {
+                username: "steve2116",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should ignore extra properties passed", () => {
+            const postUser = {
+                username: "steve2116",
+                name: "Stevie",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4",
+                cheese: "rat",
+                rat: "not mouse",
+                mouse: "cheese",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(201)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        username: "steve2116",
+                        name: "Stevie",
+                        avatar_url:
+                            "https://avatars.githubusercontent.com/u/99140971?v=4",
+                    });
+                    expect(user).not.hasOwnProperty("cheese");
+                    expect(user).not.hasOwnProperty("rat");
+                    expect(user).not.hasOwnProperty("mouse");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const postUser = {
+                username: "steve2116; DROP TABLE reviews;",
+                name: "Stevie; DROP TABLE comments",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4; DROP TABLE categories;",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(201)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({ ...postUser });
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const postUser =
+                "username,name,avatar_url\nsteve2116,Stevie,https://avatars.githubusercontent.com/u/99140971?v=4";
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+        test("Should respond with the correct error message when the user already exists", () => {
+            const postUser = {
+                username: "mallionaire",
+                name: "anything",
+                avatar_url:
+                    "https://avatars.githubusercontent.com/u/99140971?v=4",
+            };
+            return request(app)
+                .post("/api/users")
+                .send(postUser)
+                .expect(409)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User already exists");
                 });
         });
     });

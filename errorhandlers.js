@@ -11,7 +11,17 @@ exports.psqlErrors = (err, request, response, next) => {
         return response.status(404).send({ msg: "Invalid request" });
     else if (err.code === "23502")
         return response.status(400).send({ msg: "Invalid request" });
-    else next(err);
+    else if (err.code === "23505") {
+        return response.status(409).send({
+            msg: `${
+                request.originalUrl === "/api/users"
+                    ? "User"
+                    : request.originalUrl === "/api/categories"
+                    ? "Category"
+                    : "ERROR something"
+            } already exists`,
+        });
+    } else next(err);
 };
 
 exports.noneCaught = (err, request, response, next) => {
