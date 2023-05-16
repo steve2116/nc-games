@@ -1464,6 +1464,105 @@ describe("/api/users/:username", () => {
                 });
         });
     });
+    describe("PATCH", () => {
+        test("Should respond with the updated user", () => {
+            const patchUser = {
+                name: "Hazzer",
+                avatar_url:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+            };
+            return request(app)
+                .patch("/api/users/mallionaire")
+                .send(patchUser)
+                .expect(200)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        username: "mallionaire",
+                        ...patchUser,
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed a username that doesn't exist", () => {
+            const patchUser = {
+                name: "Hazzer",
+                avatar_url:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+            };
+            return request(app)
+                .patch("/api/users/nonsenseajsdnasjd")
+                .send(patchUser)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            const patchUser = {
+                name: "Hazzer",
+                avatar_url:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+            };
+            return request(app)
+                .patch("/api/users/mallionaire; DROP TABLE reviews;")
+                .send(patchUser)
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("User not found");
+                });
+        });
+        test("Should respond with the correct error message when not passed the correct properties", () => {
+            const patchUser = {
+                nae: "Hazzer",
+                avaar_url:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+            };
+            return request(app)
+                .patch("/api/users/mallionaire")
+                .send(patchUser)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe(
+                        "Insufficient information to make request"
+                    );
+                });
+        });
+        test("Should ignore extra properties", () => {
+            const patchUser = {
+                name: "Hazzer; DROP TABLE categories;",
+                avatar_urlasdasd:
+                    "https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api",
+                cheese: "cat",
+            };
+            return request(app)
+                .patch("/api/users/mallionaire")
+                .send(patchUser)
+                .expect(200)
+                .then((response) => {
+                    const { user } = response.body;
+                    expect(user).toMatchObject({
+                        name: "Hazzer; DROP TABLE categories;",
+                    });
+                    expect(user).not.hasOwnProperty("avatar_urlasdasd");
+                    expect(user).not.hasOwnProperty("cheese");
+                });
+        });
+        test("Should respond with the correct error message when the body is formatted incorrectly", () => {
+            const postUser =
+                "name,avatar_url\nHazzer,https://tse4.mm.bing.net/th?id=OIP.kj0ebmmsmKuUr7Ch08ftOAHaHa&pid=Api";
+            return request(app)
+                .patch("/api/users/mallionaire")
+                .send(postUser)
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid body format");
+                });
+        });
+    });
 });
 
 describe("/api/comments/:comment_id", () => {

@@ -278,6 +278,16 @@ module.exports = {
                     user: userExample,
                 },
             },
+            patch: {
+                status: "OK",
+                info: "Updates the specified user, then returns it",
+                data: "The user as an object with properties",
+                keys: ["username", "name", "avatar_url"],
+                queries: [],
+                "req-body": "json",
+                "res-body": "json",
+                example: { user: userExample },
+            },
         },
         "/api/comments/:comment_id": {
             get: {
