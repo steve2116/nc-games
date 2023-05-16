@@ -270,6 +270,23 @@ module.exports = {
             },
         },
         "/api/comments/:comment_id": {
+            get: {
+                status: "OK",
+                info: "Returns the specified comment",
+                data: "The specified comment as an object with properties",
+                keys: [
+                    "comment_id",
+                    "votes",
+                    "created_at",
+                    "author",
+                    "body",
+                    "review_id",
+                ],
+                queries: [],
+                "req-body": "none",
+                "res-body": "json",
+                example: { comment: commentDatawId },
+            },
             patch: {
                 status: "OK",
                 info: "Updates the specified comment, and returns it",

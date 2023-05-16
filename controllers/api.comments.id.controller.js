@@ -1,7 +1,17 @@
 const {
     removeCommentById,
     updateCommentById,
+    selectCommentById,
 } = require("../models/api.comments.id.model");
+
+exports.getCommentById = (request, response, next) => {
+    const { comment_id } = request.params;
+    return selectCommentById(comment_id)
+        .then((comment) => response.status(200).send({ comment: comment }))
+        .catch((err) => {
+            next(err);
+        });
+};
 
 exports.deleteCommentById = (request, response, next) => {
     const { comment_id } = request.params;

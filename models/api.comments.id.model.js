@@ -1,5 +1,21 @@
 const db = require("../db/connection.js");
 
+exports.selectCommentById = (id) => {
+    return db
+        .query(
+            `
+        SELECT * FROM comments
+        WHERE comment_id=$1
+    `,
+            [id]
+        )
+        .then(({ rows }) => {
+            if (rows.length === 0)
+                return Promise.reject({ code: 404, msg: "Comment not found" });
+            else return rows[0];
+        });
+};
+
 exports.updateCommentById = (id, inc_votes) => {
     return db
         .query(

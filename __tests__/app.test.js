@@ -1345,6 +1345,59 @@ describe("/api/users/:username", () => {
 });
 
 describe("/api/comments/:comment_id", () => {
+    describe("GET", () => {
+        test("Should respond with a comment", () => {
+            return request(app)
+                .get("/api/comments/2")
+                .expect(200)
+                .then((response) => {
+                    const { body } = response;
+                    expect(body).hasOwnProperty("comment");
+                });
+        });
+        test("Should respond with the specified comment formatted correctly", () => {
+            return request(app)
+                .get("/api/comments/2")
+                .then((response) => {
+                    const { comment } = response.body;
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: 13,
+                        created_at: expect.any(String),
+                        author: "mallionaire",
+                        body: "My dog loved this game too!",
+                        review_id: 3,
+                    });
+                });
+        });
+        test("Should respond with the correct error message when passed an invalid comment id", () => {
+            return request(app)
+                .get("/api/comments/nonsense")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+        test("Should respond with the correct error message when passed a comment id that doesn't exist", () => {
+            return request(app)
+                .get("/api/comments/99")
+                .expect(404)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Comment not found");
+                });
+        });
+        test("Should not allow SQL injection", () => {
+            return request(app)
+                .get("/api/comments/2; DROP TABLE reviews")
+                .expect(400)
+                .then((response) => {
+                    const { msg } = response.body;
+                    expect(msg).toBe("Invalid request");
+                });
+        });
+    });
     describe("PATCH", () => {
         test("Should return the specified comment", () => {
             const patchComment = { inc_votes: 0 };
