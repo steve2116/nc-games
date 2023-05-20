@@ -10,7 +10,7 @@
         "seed": "node ./db/seeds/run-seed.js",
         "test": "jest",
         "prepare": "husky install",
-        "run-dev": "NODE_ENV=development nodemon ./listen.js"
+        "dev": "NODE_ENV=development nodemon ./listen.js"
     },
     "repository": {
         "type": "git",

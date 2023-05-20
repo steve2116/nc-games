@@ -58,6 +58,182 @@ describe("/api", () => {
                     );
                 });
         });
+        describe.only("Queries", () => {
+            test('Should allow the client to query "method"', () => {
+                return request(app)
+                    .get("/api?method=get")
+                    .expect(200)
+                    .then((response) => {
+                        const { endpoints } = response.body;
+                        Object.values(endpoints).forEach((endpoint) => {
+                            expect(endpoint).toMatchObject({
+                                get: expect.any(Object),
+                            });
+                            expect(
+                                Object.keys(endpoint).filter(
+                                    (key) => key !== "get"
+                                ).length
+                            ).toBe(0);
+                        });
+                    });
+            });
+            test('Should allow the client to query "status"', () => {
+                return request(app)
+                    .get("/api?status=OK")
+                    .expect(200)
+                    .then((response) => {
+                        const { endpoints } = response.body;
+                        Object.values(endpoints).forEach((endpoint) => {
+                            for (let key in endpoint) {
+                                expect(endpoint[key].status).toBe("OK");
+                            }
+                        });
+                    });
+            });
+            test('Should allow the client to query "hasKeys"', () => {
+                return request(app)
+                    .get("/api?hasKeys=false")
+                    .expect(200)
+                    .then((response) => {
+                        const { endpoints } = response.body;
+                        Object.values(endpoints).forEach((endpoint) => {
+                            Object.values(endpoint).forEach((method) => {
+                                expect(method).toMatchObject({ keys: [] });
+                            });
+                        });
+                    });
+            });
+            test('Should allow the client to query "hasQueries"', () => {
+                return request(app)
+                    .get("/api?hasQueries=true")
+                    .expect(200)
+                    .then((response) => {
+                        const { endpoints } = response.body;
+                        Object.values(endpoints).forEach((endpoint) => {
+                            Object.values(endpoint).forEach((method) => {
+                                expect(method).toMatchObject({
+                                    queries: expect.any(Array),
+                                });
+                                expect(method.queries).not.toEqual([]);
+                            });
+                        });
+                    });
+            });
+            test('Should allow the client to query "req_body"', () => {
+                return request(app)
+                    .get("/api?req_body=none")
+                    .expect(200)
+                    .then((response) => {
+                        const { endpoints } = response.body;
+                        Object.values(endpoints).forEach((endpoint) => {
+                            Object.values(endpoint).forEach((method) => {
+                                expect(method).toMatchObject({
+                                    "req-body": "none",
+                                });
+                            });
+                        });
+                    });
+            });
+            test('Should allow the client to query "res_body"', () => {
+                return request(app)
+                    .get("/api?res_body=json")
+                    .expect(200)
+                    .then((response) => {
+                        const { endpoints } = response.body;
+                        Object.values(endpoints).forEach((endpoint) => {
+                            Object.values(endpoint).forEach((method) => {
+                                expect(method).toMatchObject({
+                                    "res-body": "json",
+                                });
+                            });
+                        });
+                    });
+            });
+            xtest("Should allow multiple queries", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews?category=social deduction&sort_by=title&order=asc&limit=20"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(11);
+                        expect(reviews).toBeSortedBy("title", {
+                            descending: false,
+                        });
+                        reviews.forEach((review) => {
+                            expect(review.category).toBe("social deduction");
+                        });
+                    });
+            });
+            test('Should allow the user to query "limit"', () => {
+                return request(app)
+                    .get("/api?limit=3")
+                    .expect(200)
+                    .then((response) => {
+                        const { endpoints } = response.body;
+                        expect(Object.keys(endpoints).length).toBe(3);
+                    });
+            });
+            test('Should allow the user to query "page number"', () => {
+                return request(app)
+                    .get("/api?p=2&limit=2")
+                    .expect(200)
+                    .then((response) => {
+                        const { endpoints } = response.body;
+                        expect(Object.keys(endpoints).length).toBe(2);
+                        expect(endpoints).toHaveProperty(
+                            "/api/categories/:slug"
+                        );
+                        expect(endpoints).toHaveProperty("/api/reviews");
+                    });
+            });
+            xtest("Should ignore additional queries, or queries that don't exist", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews?&category=social deduction&sort_by=title&order=asc&limit=15"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(11);
+                        expect(reviews).toBeSortedBy("title", {
+                            descending: false,
+                        });
+                        reviews.forEach((review) => {
+                            expect(review.category).toBe("social deduction");
+                        });
+                    });
+            });
+            xtest("Should ignore queries that aren't valid", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews?limit=15&category=social deduction&sort_by=title&order=asc&19223784=[Function: HelloWorld=(Hello?) => undefined]"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(11);
+                        expect(reviews).toBeSortedBy("title", {
+                            descending: false,
+                        });
+                        reviews.forEach((review) => {
+                            expect(review.category).toBe("social deduction");
+                        });
+                    });
+            });
+            xtest("Should ignore SQL injection", () => {
+                return request(app)
+                    .get(
+                        "/api/reviews?category=social deduction;DROP TABLE reviews;"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { reviews } = response.body;
+                        expect(reviews.length).toBe(0);
+                    });
+            });
+        });
     });
 });
 
@@ -115,7 +291,7 @@ describe("/api/categories", () => {
                 .expect(201)
                 .then((response) => {
                     const { body } = response;
-                    expect(body).hasOwnProperty("category");
+                    expect(body).toHaveProperty("category");
                 });
         });
         test("Should respond with the category formatted correctly", () => {
@@ -163,8 +339,8 @@ describe("/api/categories", () => {
                         slug: "shouty",
                         description: "very loud",
                     });
-                    expect(category).not.hasOwnProperty("console");
-                    expect(category).not.hasOwnProperty("log");
+                    expect(category).not.toHaveProperty("console");
+                    expect(category).not.toHaveProperty("log");
                 });
         });
         test("Should not allow SQL injection", () => {
@@ -317,8 +493,8 @@ describe("/api/categories/:slug", () => {
                         slug: "euro game",
                         description: "UPDATED",
                     });
-                    expect(category).not.hasOwnProperty("found");
-                    expect(category).not.hasOwnProperty("AIUDHNIAWUO");
+                    expect(category).not.toHaveProperty("found");
+                    expect(category).not.toHaveProperty("AIUDHNIAWUO");
                 });
         });
         test("Should respond with the correct error message when the body is formatted incorrectly", () => {
@@ -415,7 +591,7 @@ describe("/api/reviews", () => {
                             designer: expect.any(String),
                         });
                         expect(isNaN(review.comment_count)).toBe(false);
-                        expect(review).not.hasOwnProperty("review_body");
+                        expect(review).not.toHaveProperty("review_body");
                     });
                 });
         });
@@ -569,15 +745,15 @@ describe("/api/reviews", () => {
                         expect(reviews.length).toBe(1);
                     });
             });
-            test('Should have a "total_count" property, displaying total number of articles with specified queries', () => {
-                return request(app)
-                    .get("/api/reviews?limit=7&p=2&category=social deduction")
-                    .then((response) => {
-                        const { reviews, total_count } = response.body;
-                        expect(reviews.length).toBe(4);
-                        expect(total_count).toBe(11);
-                    });
-            });
+        });
+        test('Should have a "total_count" property, displaying total number of articles with specified queries', () => {
+            return request(app)
+                .get("/api/reviews?limit=7&p=2&category=social deduction")
+                .then((response) => {
+                    const { reviews, total_count } = response.body;
+                    expect(reviews.length).toBe(4);
+                    expect(total_count).toBe(11);
+                });
         });
     });
     describe("POST", () => {
@@ -596,7 +772,7 @@ describe("/api/reviews", () => {
                 .send(postReview)
                 .expect(201)
                 .then(({ body }) => {
-                    expect(body).hasOwnProperty("review");
+                    expect(body).toHaveProperty("review");
                 });
         });
         test("Should respond with a correctly formatted review", () => {
@@ -698,9 +874,9 @@ describe("/api/reviews", () => {
                 .expect(201)
                 .then((response) => {
                     const { review } = response.body;
-                    expect(review).not.hasOwnProperty("url");
-                    expect(review).not.hasOwnProperty("pie");
-                    expect(review).not.hasOwnProperty("VERYLONGSHOUTYWORD");
+                    expect(review).not.toHaveProperty("url");
+                    expect(review).not.toHaveProperty("pie");
+                    expect(review).not.toHaveProperty("VERYLONGSHOUTYWORD");
                 });
         });
         test("Should not allow SQL injection", () => {
@@ -1207,9 +1383,9 @@ describe("/api/reviews/:review_id/comments", () => {
                         created_at: expect.any(String),
                         review_id: 9,
                     });
-                    expect(comment).not.hasOwnProperty("what author likes");
-                    expect(comment).not.hasOwnProperty("username");
-                    expect(comment).not.hasOwnProperty(
+                    expect(comment).not.toHaveProperty("what author likes");
+                    expect(comment).not.toHaveProperty("username");
+                    expect(comment).not.toHaveProperty(
                         "created_at",
                         postComment.created_at
                     );
@@ -1378,9 +1554,9 @@ describe("/api/users", () => {
                         avatar_url:
                             "https://avatars.githubusercontent.com/u/99140971?v=4",
                     });
-                    expect(user).not.hasOwnProperty("cheese");
-                    expect(user).not.hasOwnProperty("rat");
-                    expect(user).not.hasOwnProperty("mouse");
+                    expect(user).not.toHaveProperty("cheese");
+                    expect(user).not.toHaveProperty("rat");
+                    expect(user).not.toHaveProperty("mouse");
                 });
         });
         test("Should not allow SQL injection", () => {
@@ -1437,7 +1613,7 @@ describe("/api/users/:username", () => {
                 .get("/api/users/mallionaire")
                 .expect(200)
                 .then((response) => {
-                    expect(response.body).hasOwnProperty("user");
+                    expect(response.body).toHaveProperty("user");
                 });
         });
         test("Should respond with a correctly formatted user", () => {
@@ -1554,8 +1730,8 @@ describe("/api/users/:username", () => {
                     expect(user).toMatchObject({
                         name: "Hazzer; DROP TABLE categories;",
                     });
-                    expect(user).not.hasOwnProperty("avatar_urlasdasd");
-                    expect(user).not.hasOwnProperty("cheese");
+                    expect(user).not.toHaveProperty("avatar_urlasdasd");
+                    expect(user).not.toHaveProperty("cheese");
                 });
         });
         test("Should respond with the correct error message when the body is formatted incorrectly", () => {
@@ -1621,7 +1797,7 @@ describe("/api/comments/:comment_id", () => {
                 .expect(200)
                 .then((response) => {
                     const { body } = response;
-                    expect(body).hasOwnProperty("comment");
+                    expect(body).toHaveProperty("comment");
                 });
         });
         test("Should respond with the specified comment formatted correctly", () => {
