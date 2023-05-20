@@ -186,7 +186,7 @@ describe("/api", () => {
                         expect(endpoints).toHaveProperty("/api/reviews");
                     });
             });
-            test("Should ignore additional queries, or queries that don't exist", () => {
+            test("Should ignore queries that don't exist", () => {
                 return request(app)
                     .get(
                         "/api?category=social deduction&sort_by=title&order=asc&lim=1&page=2&method=delete"
@@ -283,6 +283,35 @@ describe("/api/categories", () => {
                     const { msg } = response.body;
                     expect(msg).toBe("Internal server error");
                 });
+        });
+        describe("Queries", () => {
+            test("Should allow the client to query sort_by", () => {
+                return request(app)
+                    .get("/api/categories?sort_by=description")
+                    .expect(200)
+                    .then((response) => {
+                        const { categories } = response.body;
+                        expect(categories).toBeSortedBy("description", {
+                            descending: false,
+                        });
+                    });
+            });
+            test("Should allow the client to query order", () => {
+                return request(app)
+                    .get("/api/categories?order=desc")
+                    .expect(200)
+                    .then((response) => {
+                        const { categories } = response.body;
+                        expect(categories).toBeSortedBy("slug", {
+                            descending: true,
+                        });
+                    });
+            });
+            xtest("Should allow multiple queries", () => {});
+            xtest('Should allow the user to query "limit"', () => {});
+            xtest('Should allow the user to query "page number"', () => {});
+            xtest("Should ignore queries that don't exist", () => {});
+            xtest("Should not allow SQL injection", () => {});
         });
     });
     describe("POST", () => {
@@ -688,7 +717,7 @@ describe("/api/reviews", () => {
                         });
                     });
             });
-            test("Should ignore additional queries, or queries that don't exist", () => {
+            test("Should ignore queries that don't exist", () => {
                 return request(app)
                     .get(
                         "/api/reviews?&category=social deduction&sort_by=title&order=asc&limit=15"
@@ -1290,7 +1319,7 @@ describe("/api/reviews/:review_id/comments", () => {
                         expect(comments.length).toBe(1);
                     });
             });
-            test("Should ignore additional queries, or queries that don't exist", () => {
+            test("Should ignore queries that don't exist", () => {
                 return request(app)
                     .get(
                         "/api/reviews/3/comments?&category=social deduction&sort_by=title&order=asc&limit=2"

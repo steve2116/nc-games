@@ -4,7 +4,8 @@ const {
 } = require("../models/api.categories.model");
 
 exports.getCategories = (request, response, next) => {
-    return selectCategories()
+    const queries = request.query;
+    return selectCategories(queries)
         .then((categories) => {
             response.status(200).send({ categories: categories });
         })
