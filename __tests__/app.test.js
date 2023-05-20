@@ -58,7 +58,7 @@ describe("/api", () => {
                     );
                 });
         });
-        describe.only("Queries", () => {
+        describe("Queries", () => {
             test('Should allow the client to query "method"', () => {
                 return request(app)
                     .get("/api?method=get")
