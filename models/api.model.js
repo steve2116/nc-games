@@ -1,3 +1,4 @@
+const methodWL = require("../Queries/api/methodWL.js");
 const endpoints = require("../endpoints.js");
 
 exports.queryEndpoints = ({
@@ -10,11 +11,11 @@ exports.queryEndpoints = ({
     limit,
     p,
 }) => {
-    if (isNaN(limit) || limit < 1 || limit % 1 !== 0) limit = 10;
-    if (isNaN(p) || p < 1 || p % 1 !== 0) p = 1;
     return new Promise((resolve, reject) => {
+        if (isNaN(limit) || limit < 1 || limit % 1 !== 0) limit = 10;
+        if (isNaN(p) || p < 1 || p % 1 !== 0) p = 1;
         let ePs = { ...endpoints.endpoints };
-        if (method) {
+        if (method && methodWL.includes(method)) {
             ePs = Object.entries(ePs).reduce(
                 (newEndpoints, [endpoint, epObject]) => {
                     for (let key in epObject) {
@@ -32,7 +33,7 @@ exports.queryEndpoints = ({
                 {}
             );
         }
-        if (status) {
+        if (status && typeof status === "string") {
             ePs = Object.entries(ePs).reduce(
                 (newEndpoints, [endpoint, epObject]) => {
                     let newMeths = {};
@@ -48,7 +49,7 @@ exports.queryEndpoints = ({
                 {}
             );
         }
-        if (hasKeys) {
+        if (hasKeys && ["true", "false"].includes(hasKeys)) {
             ePs = Object.entries(ePs).reduce(
                 (newEndpoints, [endpoint, epObject]) => {
                     let newMeths = {};
@@ -67,7 +68,7 @@ exports.queryEndpoints = ({
                 {}
             );
         }
-        if (hasQueries) {
+        if (hasQueries && ["true", "false"].includes(hasQueries)) {
             ePs = Object.entries(ePs).reduce(
                 (newEndpoints, [endpoint, epObject]) => {
                     let newMeths = {};
@@ -88,7 +89,7 @@ exports.queryEndpoints = ({
                 {}
             );
         }
-        if (req_body) {
+        if (req_body && typeof req_body === "string") {
             ePs = Object.entries(ePs).reduce(
                 (newEndpoints, [endpoint, epObject]) => {
                     let newMeths = {};
@@ -104,7 +105,7 @@ exports.queryEndpoints = ({
                 {}
             );
         }
-        if (res_body) {
+        if (res_body && typeof res_body === "string") {
             ePs = Object.entries(ePs).reduce(
                 (newEndpoints, [endpoint, epObject]) => {
                     let newMeths = {};
