@@ -307,11 +307,63 @@ describe("/api/categories", () => {
                         });
                     });
             });
-            xtest("Should allow multiple queries", () => {});
-            xtest('Should allow the user to query "limit"', () => {});
-            xtest('Should allow the user to query "page number"', () => {});
-            xtest("Should ignore queries that don't exist", () => {});
-            xtest("Should not allow SQL injection", () => {});
+            test("Should allow multiple queries", () => {
+                return request(app)
+                    .get("/api/categories?order=asc&sort_by=description")
+                    .expect(200)
+                    .then((response) => {
+                        const { categories } = response.body;
+                        expect(categories).toBeSortedBy("description", {
+                            descending: false,
+                        });
+                    });
+            });
+            test('Should allow the user to query "limit"', () => {
+                return request(app)
+                    .get("/api/categories?limit=2")
+                    .expect(200)
+                    .then((response) => {
+                        const { categories } = response.body;
+                        expect(categories).toHaveLength(2);
+                    });
+            });
+            test('Should allow the user to query "page number"', () => {
+                return request(app)
+                    .get("/api/categories?limit=3&p=2")
+                    .expect(200)
+                    .then((response) => {
+                        const { categories } = response.body;
+                        expect(categories).toHaveLength(1);
+                    });
+            });
+            test("Should ignore queries that don't exist", () => {
+                return request(app)
+                    .get(
+                        "/api/categories?peanut=yum&allergy=true&o_oh=:(&limit=3"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { categories } = response.body;
+                        expect(categories).toHaveLength(3);
+                        expect(categories).toBeSortedBy("slug", {
+                            descending: false,
+                        });
+                    });
+            });
+            test("Should not allow SQL injection", () => {
+                return request(app)
+                    .get(
+                        "/api/categories?limit=2&sort_by=description; DROP TABLE categories;&order=desc"
+                    )
+                    .expect(200)
+                    .then((response) => {
+                        const { categories } = response.body;
+                        expect(categories).toHaveLength(2);
+                        expect(categories).toBeSortedBy("slug", {
+                            descending: true,
+                        });
+                    });
+            });
         });
     });
     describe("POST", () => {
