@@ -350,7 +350,7 @@ describe("/api/categories", () => {
                         });
                     });
             });
-            test("Should not allow SQL injection", () => {
+            test("Should ignore SQL injection", () => {
                 return request(app)
                     .get(
                         "/api/categories?limit=2&sort_by=description; DROP TABLE categories;&order=desc"

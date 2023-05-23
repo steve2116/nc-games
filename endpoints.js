@@ -60,7 +60,7 @@ module.exports = {
                 info: "Returns a list of categories",
                 data: "Each category as an object with properties.",
                 keys: ["slug", "description"],
-                queries: [],
+                queries: ["sort_by", "order", "limit", "p"],
                 "req-body": "none",
                 "res-body": "json",
                 example: {
