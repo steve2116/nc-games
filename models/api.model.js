@@ -122,16 +122,18 @@ exports.queryEndpoints = ({
             );
         }
         if (limit) {
-            let counter = 0;
+            const counter = [0, 0];
             ePs = endpoints.endpoints["/api"].get.keys.reduce(
                 (newEndpoints, endpoint, index) => {
-                    if (
-                        counter < limit &&
-                        index >= (p - 1) * limit &&
-                        Object.hasOwn(ePs, endpoint)
-                    ) {
-                        counter++;
-                        return { ...newEndpoints, [endpoint]: ePs[endpoint] };
+                    if (counter[1] < limit && Object.hasOwn(ePs, endpoint)) {
+                        counter[0]++;
+                        if (counter[0] > (p - 1) * limit) {
+                            counter[1]++;
+                            return {
+                                ...newEndpoints,
+                                [endpoint]: ePs[endpoint],
+                            };
+                        }
                     }
                     return newEndpoints;
                 },
