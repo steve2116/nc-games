@@ -1385,7 +1385,7 @@ describe("/api/reviews/:review_id/comments", () => {
             test("Should ignore queries that aren't valid", () => {
                 return request(app)
                     .get(
-                        "/api/reviews/3/comments?limit=2&category=social deduction&sort_by=title&order=asc&19223784=[Function: HelloWorld=(Hello?) => undefined]"
+                        "/api/reviews/3/comments?limit=2&category=social deduction&pizza=asc&19223784=[Function: HelloWorld=(Hello?) => undefined]"
                     )
                     .expect(200)
                     .then((response) => {
@@ -1400,6 +1400,42 @@ describe("/api/reviews/:review_id/comments", () => {
                     .then((response) => {
                         const { comments } = response.body;
                         expect(comments.length).toBe(3);
+                    });
+            });
+            test('Should allow the user to query "sort_by"', () => {
+                return request(app)
+                    .get("/api/reviews/2/comments?sort_by=votes")
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        expect(comments).toBeSortedBy("votes", {
+                            descending: true,
+                        });
+                    });
+            });
+            test('Should allow the user to query "order"', () => {
+                return request(app)
+                    .get("/api/reviews/3/comments?order=asc")
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        expect(comments).toBeSortedBy("created_at", {
+                            descending: false,
+                        });
+                    });
+            });
+            test('Should allow the user to query "author"', () => {
+                return request(app)
+                    .get("/api/reviews/2/comments?author=bainesface")
+                    .expect(200)
+                    .then((response) => {
+                        const { comments } = response.body;
+                        comments.forEach((comment) => {
+                            expect(comment).toHaveProperty(
+                                "author",
+                                "bainesface"
+                            );
+                        });
                     });
             });
         });

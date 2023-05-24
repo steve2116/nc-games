@@ -228,7 +228,7 @@ module.exports = {
                     "body",
                     "review_id",
                 ],
-                queries: ["limit", "p"],
+                queries: ["limit", "p", "sort_by", "order", "author"],
                 "req-body": "none",
                 "res-body": "json",
                 example: {
