@@ -4,6 +4,8 @@ const errorRouter = require("./routers/error-router");
 
 const app = express();
 
+app.use(require("cors")());
+
 app.use(express.json());
 
 app.use("/api", apiRouter);
