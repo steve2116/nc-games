@@ -18,6 +18,7 @@ More features may be added in the future, however for now you can see all the en
 
     ```
     git clone https://github.com/steve2116/be-nc-games.git
+    cd be-nc-games
     ```
 
 2. You will also need to download dependencies and create a database to use:
